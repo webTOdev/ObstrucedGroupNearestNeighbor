@@ -24,7 +24,6 @@
 #include "./rtree/rtree_cmd.h"
 #include "./rtree/distance.h"
 #include "./his/histogram.h"
-#include "./global.h"
 
 //Added by Tanzima
 //#include "global.h"
@@ -80,7 +79,8 @@ const double INTERVAL_R_RATIO = 2;
 //Tanzima
 char *DATAFILE = "Datasets/sample.txt";
 char *TREEFILE = "Datasets/sample.tree";
-
+char *DATAFILE_MBR = "Datasets/sample_mbr.txt";
+char *TREEFILE_MBR = "Datasets/sample_mbr.tree";
 char *STREEFILE = "H:/Thesis code/GRPLBSQ-Nusrat/Datasets/cas.tree";
 char *DTREEFILE = "H:/Thesis code/GRPLBSQ-Nusrat/Datasets/cad.tree";
 char *STREEFILE1 = "H:/Thesis code/GRPLBSQ-Nusrat/Datasets/ca1.tree";
@@ -1678,6 +1678,22 @@ void generate_input() {
 	 generate_g_rectangle(SAMPLE, DEFAULT_GRPSIZE, DEFAULT_M_AREAPART,  MIN_R_AREAPART,  MAX_R_AREAPART, MIN_M_RATIO, MAX_M_RATIO, MIN_R_RATIO, MAX_R_RATIO, s1, s2);*/
 
 }
+
+void range_test(RTree* srt){
+
+	float mbr[4];
+	mbr[0]=0;
+	mbr[1]=9;
+	mbr[2]=0;
+	mbr[3]=9;
+	SortedLinList *res_list = new SortedLinList();
+	srt -> rangeQuery(mbr, res_list);
+	printf("Range Query returned %d entries\n",res_list->get_num());
+	res_list->print();
+
+	delete res_list;
+
+}
 //----------------------------------- main -----------------------------------
 int main(int argc, char* argv[]) {
 
@@ -1689,14 +1705,14 @@ int main(int argc, char* argv[]) {
 	int dimension = 2;
 
 	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
-
+	rt->print_tree();
 
 	float m[2];
 	m[0] = 10;
 	m[1] = 10;
 
 	double nearestNeighbor[2];
-	//Load the R-Tree file
+	//Load the R-Tree file Not working :(
 	RTree *srt = new RTree(TREEFILE, cache);
 	//Nearest Neighbor query
 	rt->Point_BFN_NNQ(m, nearestNeighbor);
@@ -1704,15 +1720,8 @@ int main(int argc, char* argv[]) {
 			nearestNeighbor[0], nearestNeighbor[1]);
 
 
-	float mbr[4];
-	mbr[0]=0;
-	mbr[1]=9;
-	mbr[2]=0;
-	mbr[3]=9;
-	SortedLinList *res_list = new SortedLinList();
-	rt -> rangeQuery(mbr, res_list);
-	printf("Range Query returned %d entries\n",res_list->get_num());
-	res_list->print();
+	range_test(rt);
+
 
 	float queryPoints[3][2];
 	queryPoints[0][0] = 10;
@@ -1735,9 +1744,16 @@ int main(int argc, char* argv[]) {
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
 			kNearestNeighbor[i][0], kNearestNeighbor[i][1]);
 
+	Cache *cache_obs = new Cache(0, blocksize);
+	RTree *rt_obs = new RTree(DATAFILE_MBR, TREEFILE_MBR, b_length, cache_obs, dimension);
+	rt_obs->print_tree();
+	range_test(rt_obs);
+
 	delete rt;
 	delete srt;
 	delete cache;
+	delete cache_obs;
+	delete rt_obs;
 
 	//generate_input();
 	//exp_vary_k("C");

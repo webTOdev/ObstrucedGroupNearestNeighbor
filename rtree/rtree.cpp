@@ -49,9 +49,12 @@ RTree::RTree(char *fname, int _b_length, Cache *c, int _dimension)
 	tpheap=NULL;
 }
 //------------------------------------------------------------
+//------------------------------------------------------------
 RTree::RTree(char *fname, Cache *c)
   //use this constructor to restore a tree from a file
 {
+    int j;
+
     file = new BlockFile(fname, 0);
     cache =c;
 
@@ -64,9 +67,6 @@ RTree::RTree(char *fname, Cache *c)
 	delete [] header;
 
     root_ptr = NULL;
-
-	//added for TP KNN----------------------------------------
-	tpheap=NULL;
 }
 //------------------------------------------------------------
 RTree::RTree(char *inpname, char *fname, int _b_length, Cache *c, int _dimension)
@@ -214,6 +214,47 @@ bool RTree::delete_entry(Entry *d)
 	root_ptr = NULL;
 
 	return true;
+}
+
+//Restored by Nusrat
+void print_node(RTNode *n)
+{
+	int i;
+	RTNode *succ;
+
+	printf("RTNode %d, level %d:\n", n->block, n->level);
+    for (i=0; i<n->num_entries; i++)
+	{
+        printf("%f %f %f %f\n",
+            n->entries[i].bounces[0],
+            n->entries[i].bounces[1],
+            n->entries[i].bounces[2],
+            n->entries[i].bounces[3]);
+
+		if (n->level>0)
+		{
+		    succ = n->entries[i].get_son();
+		    print_node(succ);
+		}
+	}
+}
+
+//Restored by Nusrat
+void RTree::print_tree()
+{
+
+	load_root();
+	Entry *e;
+    e=new Entry();
+    int entrysize=e->get_size();
+	int nodesize=file->get_blocklength();
+	int capacity=(int)(nodesize-BFHEAD_LENGTH)/entrysize;
+	printf("Each node has the size %d\n",nodesize);
+	printf("Each each has the size %d\n",entrysize);
+	printf("Each node has %d entries\n",capacity-2);
+
+    print_node(root_ptr);
+
 }
 //------------------------------------------------------------
 void RTree::insert(Entry* d)
@@ -758,7 +799,7 @@ void RTree::Point_BFN_NNQ(Point2D o, double *_rslt)
 			o1[0]=(float)o[0];
 			o1[1]=(float)o[1];
 			float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
-			printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
+		//	printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
 
 			HeapEntry *he = new HeapEntry();
 			he -> key = edist;
@@ -813,9 +854,6 @@ void RTree::Point_BFN_NNQ(Point2D o, double *_rslt)
 void RTree::Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints)
 {
 
-	for(int j=0;j<numOfQueryPoints;j++){
-		printf("%f,%f\n",o[j][0],o[j][1]);
-	}
 	//init a heap that stores the non-leaf entries to be accessed-
 	Heap *heap = new Heap();
 	heap->init(dimension);
@@ -871,7 +909,7 @@ void RTree::Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints)
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
-					printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 
 				}
