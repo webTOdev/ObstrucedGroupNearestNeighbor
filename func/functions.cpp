@@ -90,8 +90,8 @@ float* overlapRect(int dimension, float *r1, float *r2)
                 delete [] overlap;
 		return NULL;
 	    }
-	    overlap[2*i] = maximum(r1[i*2], r2[i*2]);
-            overlap[2*i+1] = minimum(r1[i*2+1], r2[i*2+1]);
+	    overlap[2*i] = max_mum(r1[i*2], r2[i*2]);
+            overlap[2*i+1] = min_mum(r1[i*2+1], r2[i*2+1]);
         }
 
         return overlap;
@@ -155,9 +155,9 @@ void enlarge(int dimension, float **mbr, float *r1, float *r2)
     *mbr = new float[2*dimension];
     for (i = 0; i < 2*dimension; i += 2)
     {
-	(*mbr)[i]   = minimum(r1[i],   r2[i]);
+	(*mbr)[i]   = min_mum(r1[i],   r2[i]);
 
-	(*mbr)[i+1] = maximum(r1[i+1], r2[i+1]);
+	(*mbr)[i+1] = max_mum(r1[i+1], r2[i+1]);
     }
 }
 
@@ -425,14 +425,14 @@ float MINMAXDIST(float *p, float *bounces)
     float rmk, rMi;
     int k,i;
 
-    for( i = 0; i < DIMENSION; i++) 
+    for( i = 0; i < 2; i++)
     { 
 	rMi = (	p[i] >= (bounces[2*i]+bounces[2*i+1])/2 )
 	    ? bounces[2*i] : bounces[2*i+1];
 	S += pow( p[i] - rMi , 2 );
     }
 
-    for( k = 0; k < DIMENSION; k++)
+    for( k = 0; k < 2; k++)
     {  
 	
 	rmk = ( p[k] <=  (bounces[2*k]+bounces[2*k+1]) / 2 ) ? 
@@ -445,7 +445,7 @@ float MINMAXDIST(float *p, float *bounces)
 
 	summe += S - pow( p[k] - rMi , 2 );
 	
-	minimum = minimum( minimum,summe);
+	minimum = min_mum( minimum,summe);
     }
 
     return(minimum);
