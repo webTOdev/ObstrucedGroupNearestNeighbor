@@ -24,6 +24,7 @@
 #include "./rtree/rtree_cmd.h"
 #include "./rtree/distance.h"
 #include "./his/histogram.h"
+#include "ognn/ognn.h"
 
 //Added by Tanzima
 //#include "global.h"
@@ -1708,8 +1709,8 @@ int main(int argc, char* argv[]) {
 	rt->print_tree();
 
 	float m[2];
-	m[0] = 10;
-	m[1] = 10;
+	m[0] = 60;
+	m[1] = 30;
 
 	double nearestNeighbor[2];
 	//Load the R-Tree file Not working :(
@@ -1720,7 +1721,7 @@ int main(int argc, char* argv[]) {
 			nearestNeighbor[0], nearestNeighbor[1]);
 
 
-	range_test(rt);
+//	range_test(rt);
 
 
 	float queryPoints[3][2];
@@ -1732,28 +1733,37 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][1] = 8;
 
 	rt->Point_BFN_GNNQ(queryPoints,nearestNeighbor,3);
-	printf("Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", queryPoints[0][0],queryPoints[0][1],
+/*	printf("Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
 			nearestNeighbor[0], nearestNeighbor[1]);
-
+*/
 	int k=3;
 	double kNearestNeighbor[k][2];
 	rt->Point_BFN_kGNNQ(queryPoints,k,kNearestNeighbor,3);
-	for(int i=0;i<k;i++)
-	printf("%d-Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", k,queryPoints[0][0],queryPoints[0][1],
+	for(int i=0;i<k;i++){
+/*	printf("%d-Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", k,queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
 			kNearestNeighbor[i][0], kNearestNeighbor[i][1]);
-
-	Cache *cache_obs = new Cache(0, blocksize);
-	RTree *rt_obs = new RTree(DATAFILE_MBR, TREEFILE_MBR, b_length, cache_obs, dimension);
+*/
+	}
+	Cache *cache_obs = new Cache(0,blocksize);
+	RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
 	rt_obs->print_tree();
-	range_test(rt_obs);
+	//range_test(rt_obs);
+
+	OGNN *ognn = new OGNN();
+	m[0]=60;
+	m[1]=30;
+	ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
+
 
 	delete rt;
-	delete srt;
 	delete cache;
+	delete srt;
+
 	delete cache_obs;
 	delete rt_obs;
+	delete ognn;
 
 	//generate_input();
 	//exp_vary_k("C");

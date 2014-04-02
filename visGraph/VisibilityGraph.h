@@ -50,6 +50,7 @@ public:
 	void removeNodeFromVisGraph(Point* a);
 	void removeObsSideFromVisGraph(Line* l);
 
+	void setObstacle(vector<Obstacle*> o);
 
 	const vector<Line*>& getEdges() const {
 		return edges;

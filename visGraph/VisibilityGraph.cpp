@@ -13,43 +13,48 @@ VisibilityGraph::VisibilityGraph() {
 
 }
 
-VisibilityGraph::VisibilityGraph(vector<Obstacle*> o){
+void VisibilityGraph::setObstacle(vector<Obstacle*> o){
+
 	obstacles=o;
-	for(int i=0;i<MAX;i++){
-		pointVSPoints[i][0]=-1;
-		pointVSPoints[i][1]=-1;
-		pointVSEdges[i][0]=-1;
-		pointVSEdges[i][1]=-1;
+		for(int i=0;i<MAX;i++){
+			pointVSPoints[i][0]=-1;
+			pointVSPoints[i][1]=-1;
+			pointVSEdges[i][0]=-1;
+			pointVSEdges[i][1]=-1;
 
-	}
-	for(int i=0;i<o.size();i++){
-		vector<Line*> es=o[i]->getEdges();
-		obsSides.insert(obsSides.end(),es.begin(),es.end());
-		vector<Point*> ps = o[i]->getVertices();
-		nodes.insert(nodes.end(),ps.begin(),ps.end());
-
-		for(int j=0;j<es.size();j++){
-			Line* l=es[j];
-			if(pointVSPoints[l->a->id][0]==-1){
-				pointVSPoints[l->a->id][0]=l->b->id;
-				pointVSEdges[l->a->id][0]=l->id;
-			}
-			else{
-				pointVSPoints[l->a->id][1]=l->b->id;
-				pointVSEdges[l->a->id][1]=l->id;
-			}
-			if(pointVSPoints[l->b->id][0]==-1){
-				pointVSPoints[l->b->id][0]=l->a->id;
-				pointVSEdges[l->b->id][0]=l->id;
-			}
-			else{
-				pointVSPoints[l->b->id][1]=l->a->id;
-				pointVSEdges[l->b->id][1]=l->id;
-			}
 		}
+		for(int i=0;i<o.size();i++){
+			vector<Line*> es=o[i]->getEdges();
+			obsSides.insert(obsSides.end(),es.begin(),es.end());
+			vector<Point*> ps = o[i]->getVertices();
+			nodes.insert(nodes.end(),ps.begin(),ps.end());
+
+			for(int j=0;j<es.size();j++){
+				Line* l=es[j];
+				if(pointVSPoints[l->a->id][0]==-1){
+					pointVSPoints[l->a->id][0]=l->b->id;
+					pointVSEdges[l->a->id][0]=l->id;
+				}
+				else{
+					pointVSPoints[l->a->id][1]=l->b->id;
+					pointVSEdges[l->a->id][1]=l->id;
+				}
+				if(pointVSPoints[l->b->id][0]==-1){
+					pointVSPoints[l->b->id][0]=l->a->id;
+					pointVSEdges[l->b->id][0]=l->id;
+				}
+				else{
+					pointVSPoints[l->b->id][1]=l->a->id;
+					pointVSEdges[l->b->id][1]=l->id;
+				}
+			}
 
 
-	}
+		}
+}
+
+VisibilityGraph::VisibilityGraph(vector<Obstacle*> o){
+	setObstacle(o);
 }
 
 
