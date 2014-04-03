@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-void initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int destination);
+double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int destination);
 void printPath(int dest);
 void prim_dijkstra(int s);
 int * getShortestPath();

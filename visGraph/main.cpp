@@ -29,6 +29,7 @@ int mainst() {
 	startTime = clock();
 	vector<Obstacle*> obsList;
 	//Create a list of test obstacle
+	//ObstacleController* obsController= new ObstacleController();
 	Obstacle* obs = createObstacle(
 			"polygon((40 140,40 300,100 280,120 200,100 140,40 140))");
 	obsList.push_back(obs);
@@ -36,7 +37,7 @@ int mainst() {
 	obs = createObstacle("polygon((200 40,280 40,320 200,180 190,200 40))");
 	obsList.push_back(obs);
 
-	obs = createObstacle("polygon((30 330,180 350,120 450,30 330))");
+	obs =createObstacle("polygon((30 330,180 350,120 450,30 330))");
 	obsList.push_back(obs);
 
 	obs = createObstacle("polygon((400 320,520 320,500 520,400 530,400 320))");
@@ -45,7 +46,7 @@ int mainst() {
 	obs = createObstacle("polygon((40 20,40 20))"); //For data point
 	obsList.push_back(obs);
 
-	obs = createObstacle("polygon((440 20,440 20))"); //For data point
+	obs =createObstacle("polygon((440 20,440 20))"); //For data point
 	obsList.push_back(obs);
 
 	obs = createObstacle("polygon((600 600,600 600))"); //For data point
@@ -127,6 +128,7 @@ void drawAndWriteFileVisEdges(vector<Line*> visEdges) {
 }
 void drawObs(Obstacle* o, Point* ori) {
 
+	//ObstacleController* obsController= new ObstacleController();
 	vector<Point*> vertexList = getVertices(o);
 	int size = vertexList.size();
 	CImg<double> points(size, 2);

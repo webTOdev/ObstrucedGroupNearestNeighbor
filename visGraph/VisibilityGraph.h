@@ -14,6 +14,7 @@
 #include "boostHelper.h"
 #include "line.h"
 
+
 class VisibilityGraph: public Geometry{
 
 public:
@@ -59,6 +60,7 @@ public:
 	void setEdges(const vector<Line*>& edges) {
 		this->edges = edges;
 	}
+	double findShortestPath(double sourceX, double sourceY,double destX, double destY);
 };
 
 #endif /* VISIBILITYGRAPH_H_ */

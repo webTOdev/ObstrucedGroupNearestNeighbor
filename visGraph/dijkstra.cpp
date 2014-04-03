@@ -85,7 +85,7 @@ void prim_dijkstra(int s) //s starting point
 }
 
 
-void initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int destination) {
+double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int destination) {
     int a, b, s, g;
     double c;
     FILE *input = fopen("test.txt", "r+");
@@ -109,6 +109,8 @@ void initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int d
     printf("[DIJKSTRA]\tThe cost of the minimum path from %d to %d %s is %lf\n", s, g, (directed)?"directed":"", pathWeight[g]); // index 5 czyli v nr 6
     printPath(g);
     printf("\n");
+
+    return pathWeight[g];
 }
 
 /*

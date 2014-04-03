@@ -51,15 +51,20 @@ void OGNN::onnMultiPointApproach(Point2D queryPoints,
 	mbrRange[3] = queryPoints[0] + distance;
 	//Finding all the obstacle within the MBR with distance
 	SortedLinList* res_list = obsInRange(rt_obstacle, mbrRange);
-	//Write then ina file so that Visibility graph can be constructed
+	//Write then in a file so that Visibility graph can be constructed
 	writeDataPointPolygonInFile(firstKNN, queryPoints, res_list);
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
+	//Construct Initial Visibility Graph and calculate obstructed path distance
 	constructInitialVisGraph(initialVisGraph);
+	computeObstructedDistance(initialVisGraph,firstKNN,queryPoints,rt_obstacle);
+
 }
 
 double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 		Point2D p, Point2D q, RTree* rt_obstacle) {
-	double shortestPathDistance = -1;
+
+	double shortestPathDistance = initialVisGraph->findShortestPath(p[0],p[1],q[0],q[1]);
+	printf("\nFirst Obstructed Distance found is %lf\n",shortestPathDistance);
 	return shortestPathDistance;
 }
 
@@ -69,6 +74,7 @@ void OGNN::constructInitialVisGraph(VisibilityGraph* initialVisGraph) {
 	ifstream iFile(VISGRAPHFILE);
 	string line;
 	Obstacle* obs;
+	//ObstacleController* obsController= new ObstacleController();
 
 	/* While there is still a line. */
 	while (getline(iFile, line)) {
@@ -90,7 +96,7 @@ SortedLinList* OGNN::obsInRange(RTree* rt_obstacle, float *mbr) {
 
 	SortedLinList *res_list = new SortedLinList();
 	rt_obstacle->rangeQuery(mbr, res_list);
-	printf("Range Query returned %d entries\n", res_list->get_num());
+	printf("\nRange Query returned %d entries\n", res_list->get_num());
 	res_list->print();
 
 	return res_list;
@@ -105,10 +111,10 @@ void OGNN::writeDataPointPolygonInFile(Point2D p, Point2D q,
 		printf("Cannot open file %s", VISGRAPHFILE);
 	}
 	fprintf(input, "polygon((");
-	fprintf(input, "%f\t%f,%f\t%f", p[0], p[1], p[0], p[1]);
+	fprintf(input, "%f %f,%f %f", p[0], p[1], p[0], p[1]);
 	fprintf(input, "))");
 	fprintf(input, "\npolygon((");
-	fprintf(input, "%f\t%f,%f\t%f", q[0], q[1], q[0], q[1]);
+	fprintf(input, "%f %f,%f %f", q[0], q[1], q[0], q[1]);
 	fprintf(input, "))");
 
 	Linkable *cur = res_list->get_first();
@@ -117,11 +123,11 @@ void OGNN::writeDataPointPolygonInFile(Point2D p, Point2D q,
 		/*printf("%f %f %f %f\n", cur->bounces[0], cur->bounces[1],
 				cur->bounces[2], cur->bounces[3]);*/
 		fprintf(input, "\npolygon((");
-		fprintf(input, "%f\t%f,", cur->bounces[0], cur->bounces[2]);
-		fprintf(input, "%f\t%f,", cur->bounces[1], cur->bounces[2]);
-		fprintf(input, "%f\t%f,", cur->bounces[1], cur->bounces[3]);
-		fprintf(input, "%f\t%f,", cur->bounces[0], cur->bounces[3]);
-		fprintf(input, "%f\t%f", cur->bounces[0], cur->bounces[2]);
+		fprintf(input, "%f %f,", cur->bounces[0], cur->bounces[2]);
+		fprintf(input, "%f %f,", cur->bounces[1], cur->bounces[2]);
+		fprintf(input, "%f %f,", cur->bounces[1], cur->bounces[3]);
+		fprintf(input, "%f %f,", cur->bounces[0], cur->bounces[3]);
+		fprintf(input, "%f %f", cur->bounces[0], cur->bounces[2]);
 		fprintf(input, "))");
 		cur = res_list->get_next();
 	}

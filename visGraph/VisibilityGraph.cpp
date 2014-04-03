@@ -6,6 +6,8 @@
  */
 
 #include "VisibilityGraph.h"
+#include "pointHandler.h"
+#include "dijkstra.h"
 int MAX=1000;
 bool lineHasPoint(tPoint p,tLinestring l);
 VisibilityGraph::VisibilityGraph() {
@@ -243,4 +245,31 @@ vector<Line*> VisibilityGraph::findEdgesWithThisPoint(Point* a){
 void  VisibilityGraph::insertEdgeInVisGraph(vector<Line*> lines){
 	edges.insert(edges.end(),lines.begin(),lines.end());
 }
+
+double VisibilityGraph::findShortestPath(double sourceX, double sourceY,
+		double destX, double destY) {
+	int numOfPoints = nodes.size();
+	int numOfEdges = edges.size();
+	int sourcePointId = searchPointByCoord(nodes, sourceX, sourceY)->id;
+	int destPointId = searchPointByCoord(nodes, destX, destY)->id;
+	printf("\nFinding shortest path from %d -> %d\n", sourcePointId,
+			destPointId, numOfEdges, numOfPoints);
+	Point* start;
+	Point* goal;
+	double shortestDistance=initiateDijkstra(numOfPoints, numOfEdges, false, sourcePointId,
+			destPointId);
+	int *shortestPath = getShortestPath();
+	int i = 0;
+	//Print the Shortest Path
+	printf("The Shortest Path is :");
+	while (shortestPath[i] != -1) {
+		printf("%d ", shortestPath[i]);
+
+		i++;
+	}
+
+	return shortestDistance;
+
+	}
+
 
