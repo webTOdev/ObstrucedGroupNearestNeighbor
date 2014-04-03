@@ -1,16 +1,28 @@
 //Added by Nusrat
 
-#include "../rtree/rtree.h"
 #include "ognn.h"
-#include <math.h>
-#include "../linlist/linlist.h"
-#include "../ognn_utility.h"
+
+//#include <math.h>
+#include <cstdio>
 #include <fstream>
+#include <memory>
+#include <new>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+#include "../func/gendef.h"
+#include "../heap/heap.h"
 #include "../visGraph/obstacleController.h"
-#include "../visGraph/VisibilityGraphController.h"
 #include "../visGraph/VisibilityGraph.h"
+#include "../visGraph/VisibilityGraphController.h"
+
+class Line;
+class Obstacle;
 
 char *VISGRAPHFILE = "Datasets/visibilityGraphPolygons.txt";
+vector<string> obstacleString;
+VisibilityGraphController* vg;
 
 void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][2], RTree* rt_obstacle,
@@ -25,6 +37,22 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 
 	vector<Point2D*> dataPoints_temp, dataPoints_temp2;
 
+}
+
+void generateMBR(float* mbrRange, Point2D queryPoints, double distance) {
+	mbrRange[0] = queryPoints[0] - distance;
+	mbrRange[1] = queryPoints[0] + distance;
+	mbrRange[2] = queryPoints[1] - distance;
+	mbrRange[3] = queryPoints[0] + distance;
+}
+
+bool visGraphContainsPoly(string poly) {
+	if (std::find(obstacleString.begin(), obstacleString.end(), poly)
+			!= obstacleString.end()) {
+		return true;
+	}
+
+	return false;
 }
 
 void OGNN::onnMultiPointApproach(Point2D queryPoints,
@@ -45,10 +73,7 @@ void OGNN::onnMultiPointApproach(Point2D queryPoints,
 	double distance = getDistanceBetweenTwoPoints(firstKNN, queryPoints);
 	//Imagine a rectangle over queryPoint with distance
 	float* mbrRange = new float[4];
-	mbrRange[0] = queryPoints[0] - distance;
-	mbrRange[1] = queryPoints[0] + distance;
-	mbrRange[2] = queryPoints[1] - distance;
-	mbrRange[3] = queryPoints[0] + distance;
+	generateMBR(mbrRange, queryPoints, distance);
 	//Finding all the obstacle within the MBR with distance
 	SortedLinList* res_list = obsInRange(rt_obstacle, mbrRange);
 	//Write then in a file so that Visibility graph can be constructed
@@ -56,15 +81,76 @@ void OGNN::onnMultiPointApproach(Point2D queryPoints,
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	//Construct Initial Visibility Graph and calculate obstructed path distance
 	constructInitialVisGraph(initialVisGraph);
-	computeObstructedDistance(initialVisGraph,firstKNN,queryPoints,rt_obstacle);
+	computeObstructedDistance(initialVisGraph, firstKNN, queryPoints,
+			rt_obstacle, obstacleString);
 
 }
 
 double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
-		Point2D p, Point2D q, RTree* rt_obstacle) {
+		Point2D p, Point2D q, RTree* rt_obstacle,
+		vector<string> obstacleString) {
 
-	double shortestPathDistance = initialVisGraph->findShortestPath(p[0],p[1],q[0],q[1]);
-	printf("\nFirst Obstructed Distance found is %lf\n",shortestPathDistance);
+	double shortestPathDistance = initialVisGraph->findShortestPath(p[0], p[1],
+			q[0], q[1]);
+	printf("\nFirst Obstructed Distance found is %lf\n", shortestPathDistance);
+	float* mbrRange = new float[4];
+
+	for(int i=0;i<obstacleString.size();i++){
+			printf("\nVector has %s",obstacleString[i].c_str());
+		}
+
+	while (1) {
+		generateMBR(mbrRange, q, shortestPathDistance);
+		//Finding all the obstacle within the MBR with distance
+		SortedLinList* res_list = obsInRange(rt_obstacle, mbrRange);
+
+		//Discover new Obstacles and add in Vis Graph
+		Linkable *cur = res_list->get_first();
+		//If no new Obstacle discovered break the loop and this is the final shortest obstacle path Distance
+		if (cur == NULL)
+			break;
+		vector<string> newObstcles;
+		while (cur != NULL) {
+			char buffer[1024];
+
+			snprintf(buffer, sizeof(buffer),
+					"%s%f %f,%f %f,%f %f,%f %f,%f %f%s", "polygon((",
+					cur->bounces[0], cur->bounces[2], cur->bounces[1],
+					cur->bounces[2], cur->bounces[1], cur->bounces[3],
+					cur->bounces[0], cur->bounces[3], cur->bounces[0],
+					cur->bounces[2], "))");
+
+			//If the Graph does not contain this obstacles then add it
+			if (!visGraphContainsPoly(buffer)) {
+				printf("\nNew Polygon discovered %s\n", buffer);
+				newObstcles.push_back(buffer);
+				//Update Vis Graph with this new Polygon
+				Obstacle* obs = createObstacle(buffer);
+				initialVisGraph = vg->addNewObstacleForIncrementalVisGraph(
+						initialVisGraph, obs);
+
+			}
+
+			cur = res_list->get_next();
+		}
+
+		double newShortestPathDistance = initialVisGraph->findShortestPath(p[0],
+								p[1], q[0], q[1]);
+		//If in two iteration shortest path distance does not change then this is the final shortest obstacle path Distance
+		if(newShortestPathDistance==shortestPathDistance){
+			break;
+		}
+		else
+			shortestPathDistance=newShortestPathDistance;
+
+		obstacleString.insert(obstacleString.end(),newObstcles.begin(),newObstcles.end());
+		for(int i=0;i<obstacleString.size();i++){
+			printf("\nVector has %s",obstacleString[i].c_str());
+		}
+
+		printf("\nNew Obstructed Distance found is %lf\n", shortestPathDistance);
+	}
+
 	return shortestPathDistance;
 }
 
@@ -80,12 +166,15 @@ void OGNN::constructInitialVisGraph(VisibilityGraph* initialVisGraph) {
 	while (getline(iFile, line)) {
 		/* Printing goes here. */
 		cout << line << endl;
+		//Keeping all the polygon string in a vector so that next time we get which obstacles are already added in VisGraph
+		obstacleString.push_back(line);
 		obs = createObstacle(line);
 		obsList.push_back(obs);
 	}
 
 	initialVisGraph->setObstacle(obsList);
-	VisibilityGraphController* vg = new VisibilityGraphController(initialVisGraph);
+	vg = new VisibilityGraphController(initialVisGraph);
+	//Construct Vis Graph
 	vector<Line*> visEdges = vg->constructVisGraph();
 
 	iFile.close();
@@ -121,7 +210,7 @@ void OGNN::writeDataPointPolygonInFile(Point2D p, Point2D q,
 
 	while (cur != NULL) {
 		/*printf("%f %f %f %f\n", cur->bounces[0], cur->bounces[1],
-				cur->bounces[2], cur->bounces[3]);*/
+		 cur->bounces[2], cur->bounces[3]);*/
 		fprintf(input, "\npolygon((");
 		fprintf(input, "%f %f,", cur->bounces[0], cur->bounces[2]);
 		fprintf(input, "%f %f,", cur->bounces[1], cur->bounces[2]);
@@ -129,6 +218,7 @@ void OGNN::writeDataPointPolygonInFile(Point2D p, Point2D q,
 		fprintf(input, "%f %f,", cur->bounces[0], cur->bounces[3]);
 		fprintf(input, "%f %f", cur->bounces[0], cur->bounces[2]);
 		fprintf(input, "))");
+
 		cur = res_list->get_next();
 	}
 
