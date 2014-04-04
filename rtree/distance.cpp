@@ -16,7 +16,7 @@ bool chk_in(float _a, float _b1, float _b2)
 //-----------------------------------------------------------
 bool chk_intr(float _a1, float _a2, float _b1, float _b2)
 {
-	if (maximum(_a1, _b1) <= minimum(_a2, _b2))
+	if (max_mum(_a1, _b1) <= min_mum(_a2, _b2))
 		return true;
 	else 
 		return false;
@@ -70,18 +70,18 @@ void intr_period(float *_m1, float *_m2, float *_v1, float *_v2,
 			trl = (m1xr - m2xl) / (m2vl - m1vr);
 		if (tlr >= 0 && trl >= 0)
 		{
-			tsi[i] = minimum(tlr, trl); tei[i] = maximum(tlr, trl);
+			tsi[i] = min_mum(tlr, trl); tei[i] = max_mum(tlr, trl);
 		}
 		else
-			if (maximum(tlr, trl) >= 0)
+			if (max_mum(tlr, trl) >= 0)
 			{
 				if (chk_intr(m1xl, m1xr, m2xl, m2xr))
 				{
-					tsi[i] = 0; tei[i] = maximum(tlr, trl);
+					tsi[i] = 0; tei[i] = max_mum(tlr, trl);
 				}
 				else
 				{
-					tsi[i] = maximum(tlr, trl); tei[i] = MAXREAL;
+					tsi[i] = max_mum(tlr, trl); tei[i] = MAXREAL;
 				}
 			}
 			else
@@ -100,7 +100,7 @@ void intr_period(float *_m1, float *_m2, float *_v1, float *_v2,
 	_ts = -MAXREAL; _te = MAXREAL;
 	for (int i = 0; i < _dim; i ++)
 	{
-		_ts = maximum(_ts, tsi[i]); _te = minimum(_te, tei[i]);
+		_ts = max_mum(_ts, tsi[i]); _te = min_mum(_te, tei[i]);
 	}
 	if (_ts > _te)
 	{
@@ -148,12 +148,12 @@ float NNinf(float *_m1, float *_m2, float *_m3, int _dim)
 		if (t1 >= 0)
 			return 0;
 		else
-			return maximum(0, t2);
+			return max_mum(0, t2);
 	}
 	else
 	{
 		if (t2 >= 0)
-			return maximum(0, t1);
+			return max_mum(0, t1);
 		else
 			return MAXREAL;
 	}
@@ -300,7 +300,7 @@ float partintr_time(float *_m1, float *_m2, float *_v1, float *_v2, int _dim,
 				if (chk_part_intr(m1xlts, m1xrts, m2xlts, m2xrts))
 					tpari[i] = _ts;
 				else
-					tpari[i] = minimum(tll, trr);
+					tpari[i] = min_mum(tll, trr);
 			}
 			else
 			{
@@ -319,7 +319,7 @@ float partintr_time(float *_m1, float *_m2, float *_v1, float *_v2, int _dim,
 	tpar = MAXREAL; 
 	for (int i = 0; i < _dim; i ++)
 	{
-		tpar = minimum(tpar, tpari[i]);
+		tpar = min_mum(tpar, tpari[i]);
 	}
 
 	delete [] tpari;

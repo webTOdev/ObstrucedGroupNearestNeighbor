@@ -80,6 +80,8 @@ public:
 	void write_header(char *buffer);
 	int update_rslt(Entry *_e, float _dist, Entry *_rslt, 
 					 float *_key, int _k);
+	//Restored by Nusrat
+	void print_tree();
 
 	// This function was added to perform TP-kNN queries by Bobby
 	void TPNN_TP(float *_qline, int _k, Entry *_nn, Entry *_rslt, float _max_trvl);

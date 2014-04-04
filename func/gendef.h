@@ -24,13 +24,13 @@ typedef char Block[];
 #define FLOATZERO       1e-8
 #define MAX_DIMENSION   256
 
-#define DIMENSION 2
+
 
 #define TRUE 1
 #define FALSE 0
 
-#define minimum(a, b) (((a) < (b))? (a) : (b)  )
-#define maximum(a, b) (((a) > (b))? (a) : (b)  )
+#define min_mum(a, b) (((a) < (b))? (a) : (b)  )
+#define max_mum(a, b) (((a) > (b))? (a) : (b)  )
 //-------------------Class and other data types--------------
 class BlockFile;  //for BlockFile definition
 class Cache;
@@ -95,7 +95,7 @@ struct BranchList
 };
 
 //Added by Tanzima
-typedef float Point2D[DIMENSION];
+typedef float Point2D[2];
 struct Pointlocation
 {
 	float x;

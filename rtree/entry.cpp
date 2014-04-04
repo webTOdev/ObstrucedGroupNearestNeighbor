@@ -101,10 +101,10 @@ SECTION Entry::section(float *mbr)
 
     for (int i = 0; i < dimension; i++)
     {
-    	printf("if (mbr[%d] > bounces[%d] ||  mbr[%d] < bounces[%d]) == %f>%f || %f>%f   (overlap=false)\n",2*i,2*i+1,2 * i + 1,2*i,mbr[2*i],bounces[2*i+1],mbr[2 * i + 1],bounces[2*i]);
+    	//printf("if (mbr[%d] > bounces[%d] ||  mbr[%d] < bounces[%d]) == %f>%f || %f>%f   (overlap=false)\n",2*i,2*i+1,2 * i + 1,2*i,mbr[2*i],bounces[2*i+1],mbr[2 * i + 1],bounces[2*i]);
 		if (mbr[2 * i] > bounces[2 * i + 1] ||  mbr[2 * i + 1] < bounces[2 * i])
 			overlap = FALSE;
-		printf("if (mbr[%d] > bounces[%d] ||  mbr[%d] < bounces[%d]) == %f>%f || %f>%f   (inside=false)\n",2*i,2*i,2 * i + 1,2*i+1,mbr[2*i],bounces[2*i],mbr[2 * i + 1],bounces[2*i+1]);
+		//printf("if (mbr[%d] > bounces[%d] ||  mbr[%d] < bounces[%d]) == %f>%f || %f>%f   (inside=false)\n",2*i,2*i,2 * i + 1,2*i+1,mbr[2*i],bounces[2*i],mbr[2 * i + 1],bounces[2*i+1]);
 		if (mbr[2 * i] < bounces[2 * i] || mbr[2 * i + 1] > bounces[2 * i + 1])
 			inside = FALSE;
     }
