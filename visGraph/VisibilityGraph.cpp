@@ -261,10 +261,9 @@ double VisibilityGraph::findShortestPath(double sourceX, double sourceY,
 	int *shortestPath = getShortestPath();
 	int i = 0;
 	//Print the Shortest Path
-	printf("The Shortest Path is :");
+	//printf("The Shortest Path is :");
 	while (shortestPath[i] != -1) {
-		printf("%d ", shortestPath[i]);
-
+		//printf("%d ", shortestPath[i]);
 		i++;
 	}
 

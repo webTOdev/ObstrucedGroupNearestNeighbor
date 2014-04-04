@@ -1714,7 +1714,7 @@ int main(int argc, char* argv[]) {
 
 	double nearestNeighbor[2];
 	//Load the R-Tree file Not working :(
-	RTree *srt = new RTree(TREEFILE, cache);
+	//RTree *srt = new RTree(TREEFILE, cache);
 	//Nearest Neighbor query
 	rt->Point_BFN_NNQ(m, nearestNeighbor);
 	printf("Nearest Neighbor of %f,%f is %f,%f\n", m[0], m[1],
@@ -1757,13 +1757,14 @@ int main(int argc, char* argv[]) {
 	ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
 
 
+	//delete cache;
 	delete rt;
-	delete cache;
-	delete srt;
 
-	delete cache_obs;
+
+
+	//delete cache_obs;
 	delete rt_obs;
-	delete ognn;
+	//delete ognn;
 
 	//generate_input();
 	//exp_vary_k("C");

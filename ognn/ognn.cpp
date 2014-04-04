@@ -71,6 +71,7 @@ void OGNN::onnMultiPointApproach(Point2D queryPoints,
 	firstKNN[0] = kNN[0];
 	firstKNN[1] = kNN[1];
 	double distance = getDistanceBetweenTwoPoints(firstKNN, queryPoints);
+	printf("\nEuclidean Distance is %lf", distance);
 	//Imagine a rectangle over queryPoint with distance
 	float* mbrRange = new float[4];
 	generateMBR(mbrRange, queryPoints, distance);
@@ -81,8 +82,8 @@ void OGNN::onnMultiPointApproach(Point2D queryPoints,
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	//Construct Initial Visibility Graph and calculate obstructed path distance
 	constructInitialVisGraph(initialVisGraph);
-	computeObstructedDistance(initialVisGraph, firstKNN, queryPoints,
-			rt_obstacle, obstacleString);
+	double obstructedDistance = computeObstructedDistance(initialVisGraph, firstKNN, queryPoints,rt_obstacle, obstacleString);
+	printf("\nObstructed Distance is %lf\n", obstructedDistance);
 
 }
 
@@ -94,11 +95,6 @@ double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 			q[0], q[1]);
 	printf("\nFirst Obstructed Distance found is %lf\n", shortestPathDistance);
 	float* mbrRange = new float[4];
-
-	for(int i=0;i<obstacleString.size();i++){
-			printf("\nVector has %s",obstacleString[i].c_str());
-		}
-
 	while (1) {
 		generateMBR(mbrRange, q, shortestPathDistance);
 		//Finding all the obstacle within the MBR with distance
@@ -128,7 +124,7 @@ double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 				Obstacle* obs = createObstacle(buffer);
 				initialVisGraph = vg->addNewObstacleForIncrementalVisGraph(
 						initialVisGraph, obs);
-
+				obstacleString.insert(obstacleString.end(),newObstcles.begin(),newObstcles.end());
 			}
 
 			cur = res_list->get_next();
@@ -136,21 +132,21 @@ double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 
 		double newShortestPathDistance = initialVisGraph->findShortestPath(p[0],
 								p[1], q[0], q[1]);
+		printf("\nNew Obstructed Distance found is %lf", newShortestPathDistance);
 		//If in two iteration shortest path distance does not change then this is the final shortest obstacle path Distance
 		if(newShortestPathDistance==shortestPathDistance){
+			printf("\nObstructed distance remains same in two consecutive iterations so breaking while loop.");
 			break;
 		}
 		else
 			shortestPathDistance=newShortestPathDistance;
 
-		obstacleString.insert(obstacleString.end(),newObstcles.begin(),newObstcles.end());
-		for(int i=0;i<obstacleString.size();i++){
-			printf("\nVector has %s",obstacleString[i].c_str());
-		}
-
-		printf("\nNew Obstructed Distance found is %lf\n", shortestPathDistance);
 	}
-
+/*
+	for(int i=0;i<obstacleString.size();i++){
+		printf("\nVector has %s",obstacleString[i].c_str());
+	}
+*/
 	return shortestPathDistance;
 }
 
