@@ -10,12 +10,12 @@
 #include<vector>
 #include<set>
 #include "dijkstra.h"
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 
 const int infty = 1000000000; // limit
-const int MAX_NUM_VERTEX=pow(2,16);
+const int MAX_NUM_VERTEX=pow(2.0,16.0);
 int verticesNum;
 int edgesNum;
 vector< vector< pair<int, double> > > comparisionMatrix;
