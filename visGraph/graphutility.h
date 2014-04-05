@@ -7,6 +7,7 @@
 
 #ifndef GRAPHUTILITY_H_
 #define GRAPHUTILITY_H_
+#define _USE_MATH_DEFINES
 #include <vector>
 #include "point.h"
 #include "pointHandler.h"

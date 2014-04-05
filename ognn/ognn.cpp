@@ -43,7 +43,7 @@ void generateMBR(float* mbrRange, Point2D queryPoints, double distance) {
 	mbrRange[0] = queryPoints[0] - distance;
 	mbrRange[1] = queryPoints[0] + distance;
 	mbrRange[2] = queryPoints[1] - distance;
-	mbrRange[3] = queryPoints[0] + distance;
+	mbrRange[3] = queryPoints[1] + distance;
 }
 
 bool visGraphContainsPoly(string poly) {
@@ -55,11 +55,24 @@ bool visGraphContainsPoly(string poly) {
 	return false;
 }
 
+void drawAndWriteFileVisEdges(vector<Line*> visEdges) {
+	//Remove existing test.txt file
+	if (remove("test.txt") != 0)
+		perror("Error deleting file");
+	else
+		puts("File successfully deleted");
+
+	for (int i = 0; i < visEdges.size(); i++) {
+		fileWrite(visEdges[i]->a, visEdges[i]->b);
+	}
+}
+
+
 void OGNN::onnMultiPointApproach(Point2D queryPoints,
 		double kNearestNeighbor[][2], RTree* rt_obstacle,
 		RTree* rt_dataPoints) {
 
-	double *kNN;
+	double *kNN = new double[3];
 	//kNearestNeighbour holds the kNN Euclidean
 	rt_dataPoints->Point_BFN_NNQ(queryPoints, kNN);
 	//init a heap that stores the obstructed kGNN
@@ -109,7 +122,7 @@ double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 		while (cur != NULL) {
 			char buffer[1024];
 
-			snprintf(buffer, sizeof(buffer),
+			_snprintf(buffer, sizeof(buffer),
 					"%s%f %f,%f %f,%f %f,%f %f,%f %f%s", "polygon((",
 					cur->bounces[0], cur->bounces[2], cur->bounces[1],
 					cur->bounces[2], cur->bounces[1], cur->bounces[3],
@@ -130,6 +143,7 @@ double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 			cur = res_list->get_next();
 		}
 
+		drawAndWriteFileVisEdges(initialVisGraph->edges);
 		double newShortestPathDistance = initialVisGraph->findShortestPath(p[0],
 								p[1], q[0], q[1]);
 		printf("\nNew Obstructed Distance found is %lf", newShortestPathDistance);
@@ -161,7 +175,7 @@ void OGNN::constructInitialVisGraph(VisibilityGraph* initialVisGraph) {
 	/* While there is still a line. */
 	while (getline(iFile, line)) {
 		/* Printing goes here. */
-		cout << line << endl;
+		//cout << line << endl;
 		//Keeping all the polygon string in a vector so that next time we get which obstacles are already added in VisGraph
 		obstacleString.push_back(line);
 		obs = createObstacle(line);
@@ -172,6 +186,7 @@ void OGNN::constructInitialVisGraph(VisibilityGraph* initialVisGraph) {
 	vg = new VisibilityGraphController(initialVisGraph);
 	//Construct Vis Graph
 	vector<Line*> visEdges = vg->constructVisGraph();
+	drawAndWriteFileVisEdges(visEdges);
 
 	iFile.close();
 
@@ -181,8 +196,9 @@ SortedLinList* OGNN::obsInRange(RTree* rt_obstacle, float *mbr) {
 
 	SortedLinList *res_list = new SortedLinList();
 	rt_obstacle->rangeQuery(mbr, res_list);
+	printf("\n%f %f %f %f",mbr[0],mbr[1],mbr[2],mbr[3]);
 	printf("\nRange Query returned %d entries\n", res_list->get_num());
-	res_list->print();
+	//res_list->print();
 
 	return res_list;
 

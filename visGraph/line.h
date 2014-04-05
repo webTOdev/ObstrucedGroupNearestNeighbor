@@ -1,6 +1,7 @@
 #ifndef LINE_H_INCLUDED
 #define LINE_H_INCLUDED
 
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include "point.h"
 #include "geometry.h"
