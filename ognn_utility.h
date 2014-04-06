@@ -18,11 +18,20 @@ struct MyStruct
 	MyStruct(double d , Point2D q) { distance = d; queryPoints =  q ;}
 };
 //Use this struct to sort  q according to distance descending
-struct less_than_key
+struct more_than_key
 {
     inline bool operator() (const MyStruct& struct1, const MyStruct& struct2)
     {
         return (struct1.distance > struct2.distance);
+    }
+};
+
+//Use this struct to sort  q according to distance ascending
+struct less_than_key
+{
+    inline bool operator() (const MyStruct& struct1, const MyStruct& struct2)
+    {
+        return (struct1.distance < struct2.distance);
     }
 };
 

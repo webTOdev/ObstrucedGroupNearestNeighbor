@@ -25,6 +25,8 @@ public:
 	SortedLinList* obsInRange(RTree* rt_obstacle,float *mbr);
 	void writeDataPointPolygonInFile(Point2D p,Point2D q,SortedLinList *res_list);
 	void constructInitialVisGraph(VisibilityGraph* initialVisGraph);
+	void writePointInFile(Point2D p);
+	void updateVisGraphFromFile(VisibilityGraph* initialVisGraph);
 };
 
 
