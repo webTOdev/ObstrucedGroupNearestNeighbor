@@ -46,7 +46,7 @@ vector<Line*> VisibilityGraphController::constructVisGraph(){
 	visEdges.clear();
 	//Iterate over eahc of the nodes and generate visibility for them
 	for(int i=0;i<visGraph->nodes.size();i++){
-		printf("\nFinding visible vertices for node %d total nodes %d\n",i,visGraph->nodes.size());
+		//printf("\nFinding visible vertices for node %d total nodes %d\n",i,visGraph->nodes.size());
 		Point* p=visGraph->nodes[i];
 		temp.clear();
 		temp = visibleVertices(p);

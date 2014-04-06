@@ -831,7 +831,7 @@ void RTree::Point_BFN_NNQ(Point2D o, double *_rslt)
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
-					printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 														
 				}
@@ -958,7 +958,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				//printf("%f,%f has mindist %f\n",o1[0],o1[1],edist);
 			}
 
-			printf("Entry %d : mindist %f\n",i,gnnMinDist);
+			//printf("Entry %d : mindist %f\n",i,gnnMinDist);
 
 			HeapEntry *he = new HeapEntry();
 			he -> key = gnnMinDist;
@@ -991,7 +991,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				{
 					_rslt[indexOfGNNRetrieved][0] = he->x1;
 					_rslt[indexOfGNNRetrieved][1] = he->y1;
-					printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 					indexOfGNNRetrieved++;
 

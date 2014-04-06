@@ -24,20 +24,6 @@ char *VISGRAPHFILE = "Datasets/visibilityGraphPolygons.txt";
 vector<string> obstacleString;
 VisibilityGraphController* vg;
 
-void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
-		int k, double kNearestNeighbor[][2], RTree* rt_obstacle,
-		RTree* rt_dataPoints) {
-
-	//kNearestNeighbour holds the kGNN Euclidean
-	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,
-			numOfQueryPoints);
-	//init a heap that stores the obstructed kGNN
-	Heap *heap_kGNN_obstructed = new Heap();
-	heap_kGNN_obstructed->init(rt_dataPoints->dimension);
-
-	vector<Point2D*> dataPoints_temp, dataPoints_temp2;
-
-}
 
 void generateMBR(float* mbrRange, Point2D queryPoints, double distance) {
 	mbrRange[0] = queryPoints[0] - distance;
@@ -55,16 +41,93 @@ bool visGraphContainsPoly(string poly) {
 	return false;
 }
 
-void drawAndWriteFileVisEdges(vector<Line*> visEdges) {
+int drawAndWriteFileVisEdges(vector<Line*> visEdges) {
 	//Remove existing test.txt file
 	if (remove("test.txt") != 0)
 		perror("Error deleting file");
 	else
 		puts("File successfully deleted");
-
+	/*FILE *fp;
+	fp=fopen("test.txt", "w");
+	fclose(fp);
+*/
+	//Dijkstra algorithm needs to create a vector of size n , where n is the id of the vertex
+	int maxNumberOfVertex=-1;
 	for (int i = 0; i < visEdges.size(); i++) {
 		fileWrite(visEdges[i]->a, visEdges[i]->b);
+		if(visEdges[i]->a->id > maxNumberOfVertex){
+			maxNumberOfVertex=visEdges[i]->a->id;
+		}else
+			if(visEdges[i]->b->id > maxNumberOfVertex){
+			maxNumberOfVertex=visEdges[i]->b->id;
+		}
 	}
+	return maxNumberOfVertex+1;
+}
+
+
+void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
+		int k, double kNearestNeighbor[][2], RTree* rt_obstacle,
+		RTree* rt_dataPoints) {
+
+	//kNearestNeighbour holds the kGNN Euclidean
+	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,
+			numOfQueryPoints);
+	//init a heap that stores the obstructed kGNN
+	Heap *heap_kGNN_obstructed = new Heap();
+	heap_kGNN_obstructed->init(rt_dataPoints->dimension);
+
+	vector<Point2D*> dataPoints_temp, dataPoints_temp2;
+	
+	float *kNN_point,*q;
+	VisibilityGraph* initialVisGraph = new VisibilityGraph();
+	for(int i=0;i<k;i++){
+		std::vector < MyStruct > queryPoints_sorted;
+		kNN_point = new float[2];
+		kNN_point[0] = kNearestNeighbor[i][0];
+		kNN_point[1] = kNearestNeighbor[i][1];
+
+		for(int j=0;j<numOfQueryPoints;j++){
+			q = new float[2];
+			q[0]=queryPoints[j][0];
+			q[1]=queryPoints[j][1];
+			double distance = getDistanceBetweenTwoPoints(kNN_point, q);
+			//printf("\nEuclidean Distance is %lf for q %f,%f", distance,q[0],q[1]);
+			queryPoints_sorted.push_back(MyStruct(distance, q));
+		}
+
+		std::sort(queryPoints_sorted.begin(), queryPoints_sorted.end(), less_than_key());
+		//Imagine a rectangle over knn data point with distance
+		float* mbrRange = new float[4];
+		generateMBR(mbrRange, kNN_point, queryPoints_sorted[0].distance);
+		//Finding all the obstacle within the MBR with distance
+		SortedLinList* res_list = obsInRange(rt_obstacle, mbrRange);
+		double aggregateObstructedDistance=0;		
+		for(int j=0;j<numOfQueryPoints;j++){
+		//printf("\n(%f,%f) has distance %f\n",queryPoints_sorted[j].queryPoints[0],queryPoints_sorted[j].queryPoints[1],queryPoints_sorted[j].distance);
+			q = new float[2];
+			q[0]=queryPoints_sorted[j].queryPoints[0];
+			q[1]=queryPoints_sorted[j].queryPoints[1];
+
+			//Write then in a file so that Visibility graph can be constructed
+			writeDataPointPolygonInFile(kNN_point, q, res_list);
+			
+			//Construct Initial Visibility Graph and calculate obstructed path distance
+			constructInitialVisGraph(initialVisGraph);
+			double obstructedDistance = computeObstructedDistance(initialVisGraph, kNN_point, q, rt_obstacle,obstacleString);
+			printf("\nObstructed Distance is %lf\n", obstructedDistance);
+			aggregateObstructedDistance+=obstructedDistance;
+
+		}
+		printf("\nAggregate Obstructed Distance is of data point p(%f,%f) is %lf\n",kNN_point[0],kNN_point[1], aggregateObstructedDistance);
+
+	}
+
+
+	
+
+
+
 }
 
 
@@ -103,11 +166,12 @@ void OGNN::onnMultiPointApproach(Point2D queryPoints,
 double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 		Point2D p, Point2D q, RTree* rt_obstacle,
 		vector<string> obstacleString) {
-
+	int maxVertexNum = drawAndWriteFileVisEdges(initialVisGraph->edges);
 	double shortestPathDistance = initialVisGraph->findShortestPath(p[0], p[1],
-			q[0], q[1]);
-	printf("\nFirst Obstructed Distance found is %lf\n", shortestPathDistance);
+			q[0], q[1],maxVertexNum);
+	//printf("\nFirst Obstructed Distance found is %lf\n", shortestPathDistance);
 	float* mbrRange = new float[4];
+	bool newObsDiscovered=false;
 	while (1) {
 		generateMBR(mbrRange, q, shortestPathDistance);
 		//Finding all the obstacle within the MBR with distance
@@ -138,15 +202,20 @@ double OGNN::computeObstructedDistance(VisibilityGraph* initialVisGraph,
 				initialVisGraph = vg->addNewObstacleForIncrementalVisGraph(
 						initialVisGraph, obs);
 				obstacleString.insert(obstacleString.end(),newObstcles.begin(),newObstcles.end());
+				newObsDiscovered=true;
 			}
 
 			cur = res_list->get_next();
 		}
 
-		drawAndWriteFileVisEdges(initialVisGraph->edges);
-		double newShortestPathDistance = initialVisGraph->findShortestPath(p[0],
-								p[1], q[0], q[1]);
-		printf("\nNew Obstructed Distance found is %lf", newShortestPathDistance);
+		double newShortestPathDistance=shortestPathDistance;
+		if(newObsDiscovered){
+			int maxVertexNum = drawAndWriteFileVisEdges(initialVisGraph->edges);
+			double newShortestPathDistance = initialVisGraph->findShortestPath(p[0],
+								p[1], q[0], q[1],maxVertexNum);
+			printf("\nNew Obstructed Distance found is %lf", newShortestPathDistance);
+			newObsDiscovered=false;
+		}
 		//If in two iteration shortest path distance does not change then this is the final shortest obstacle path Distance
 		if(newShortestPathDistance==shortestPathDistance){
 			printf("\nObstructed distance remains same in two consecutive iterations so breaking while loop.");
@@ -186,7 +255,7 @@ void OGNN::constructInitialVisGraph(VisibilityGraph* initialVisGraph) {
 	vg = new VisibilityGraphController(initialVisGraph);
 	//Construct Vis Graph
 	vector<Line*> visEdges = vg->constructVisGraph();
-	drawAndWriteFileVisEdges(visEdges);
+
 
 	iFile.close();
 
@@ -196,7 +265,7 @@ SortedLinList* OGNN::obsInRange(RTree* rt_obstacle, float *mbr) {
 
 	SortedLinList *res_list = new SortedLinList();
 	rt_obstacle->rangeQuery(mbr, res_list);
-	printf("\n%f %f %f %f",mbr[0],mbr[1],mbr[2],mbr[3]);
+	//printf("\n%f %f %f %f",mbr[0],mbr[1],mbr[2],mbr[3]);
 	printf("\nRange Query returned %d entries\n", res_list->get_num());
 	//res_list->print();
 

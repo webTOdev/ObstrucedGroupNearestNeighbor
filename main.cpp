@@ -1772,10 +1772,10 @@ int main(int argc, char* argv[]) {
 	RTree *srt = new RTree(TREEFILE, cache);
 //	rt->print_tree();
 	//Nearest Neighbor query
-	rt->Point_BFN_NNQ(m, nearestNeighbor);
+	/*rt->Point_BFN_NNQ(m, nearestNeighbor);
 	printf("Nearest Neighbor of %f,%f is %f,%f\n", m[0], m[1],
 			nearestNeighbor[0], nearestNeighbor[1]);
-
+*/
 
 //	range_test(rt);
 
@@ -1813,7 +1813,8 @@ int main(int argc, char* argv[]) {
 
 //	m[0]=30 ;
 	//	m[1]=60;
-	ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
+	//ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
+	ognn->ognnMultiPointApproach(queryPoints,3,3,kNearestNeighbor, rt_obs,rt);
 
 
 	delete cache;
