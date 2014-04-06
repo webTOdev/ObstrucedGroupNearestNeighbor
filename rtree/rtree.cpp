@@ -991,7 +991,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				{
 					_rslt[indexOfGNNRetrieved][0] = he->x1;
 					_rslt[indexOfGNNRetrieved][1] = he->y1;
-					printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 					indexOfGNNRetrieved++;
 

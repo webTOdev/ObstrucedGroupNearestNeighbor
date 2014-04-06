@@ -108,15 +108,17 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		kNN_point = new float[2];
 		kNN_point[0] = kNearestNeighbor[i][0];
 		kNN_point[1] = kNearestNeighbor[i][1];
-
+		double aggregateEuclideanDist=0;
 		for(int j=0;j<numOfQueryPoints;j++){
 			q = new float[2];
 			q[0]=queryPoints[j][0];
 			q[1]=queryPoints[j][1];
 			double distance = getDistanceBetweenTwoPoints(kNN_point, q);
+			aggregateEuclideanDist+=distance;
 			//printf("\nEuclidean Distance is %lf for q %f,%f", distance,q[0],q[1]);
 			queryPoints_sorted.push_back(MyStruct(distance, q));
 		}
+		printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", aggregateEuclideanDist,kNN_point[0],kNN_point[1]);
 
 		std::sort(queryPoints_sorted.begin(), queryPoints_sorted.end(), more_than_key());
 		//Imagine a rectangle over knn data point with distance
@@ -167,9 +169,9 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		removeDataPointFromVG(initialVisGraph,kNN_point);
 	}
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
-	printf("k- Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is ",queryPoints[0][0],queryPoints[0][1],
-			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1]);
-	
+//	printf("k- Obs Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is ",queryPoints[0][0],queryPoints[0][1],
+//			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1]);
+		printf("\nk- Obs Group Nearest Neighbor\n");
 	for(int index=0;index<k;index++){
 		//printf("\n(%f,%f) has distance %f\n",queryPoints_sorted[j].queryPoints[0],queryPoints_sorted[j].queryPoints[1],queryPoints_sorted[j].distance);
 			q = new float[2];
