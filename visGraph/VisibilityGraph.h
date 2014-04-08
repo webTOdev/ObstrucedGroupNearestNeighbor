@@ -60,7 +60,7 @@ public:
 	void setEdges(const vector<Line*>& edges) {
 		this->edges = edges;
 	}
-	double findShortestPath(double sourceX, double sourceY,double destX, double destY);
+	double findShortestPath(double sourceX, double sourceY,double destX, double destY,int maxVertexNum);
 };
 
 #endif /* VISIBILITYGRAPH_H_ */

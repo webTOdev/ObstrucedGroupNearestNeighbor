@@ -46,6 +46,7 @@ vector<Line*> VisibilityGraphController::constructVisGraph(){
 	visEdges.clear();
 	//Iterate over eahc of the nodes and generate visibility for them
 	for(int i=0;i<visGraph->nodes.size();i++){
+		//printf("\nFinding visible vertices for node %d total nodes %d\n",i,visGraph->nodes.size());
 		Point* p=visGraph->nodes[i];
 		temp.clear();
 		temp = visibleVertices(p);
@@ -135,7 +136,7 @@ vector<Line*> VisibilityGraphController::generateVisibleEdge(angleContainer angl
 
 	int index=1;
 	//Keep the earlier Point
-	Point* w_i_1;
+	Point* w_i_1 = new Point(-111111,-111111);//dummy value
 	//Find the visibility of other points for a given point
 	  key_index_t& kindex = angles.get<key_tag>();
 	  for( key_index_t::iterator k = kindex.begin(); k != kindex.end(); ++k ){
@@ -147,7 +148,7 @@ vector<Line*> VisibilityGraphController::generateVisibleEdge(angleContainer angl
 			  w_i_1=(--k)->second;
 			  ++k;
 		  }
-		 // std::cout << "Sweeps at "<<w_i->id<<std::endl;
+		  //std::cout << "Sweeps at "<<w_i->id<<std::endl;
 		  index++;
 
 		  sweepLine=new Line(ori,w_i);

@@ -831,7 +831,7 @@ void RTree::Point_BFN_NNQ(Point2D o, double *_rslt)
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
-					printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 														
 				}
@@ -958,7 +958,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				//printf("%f,%f has mindist %f\n",o1[0],o1[1],edist);
 			}
 
-			printf("Entry %d : mindist %f\n",i,gnnMinDist);
+			//printf("Entry %d : mindist %f\n",i,gnnMinDist);
 
 			HeapEntry *he = new HeapEntry();
 			he -> key = gnnMinDist;
@@ -991,7 +991,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				{
 					_rslt[indexOfGNNRetrieved][0] = he->x1;
 					_rslt[indexOfGNNRetrieved][1] = he->y1;
-					printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 					indexOfGNNRetrieved++;
 
@@ -1004,12 +1004,57 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 			}
 		}
 
-		delete he;
+		
+		//Storing the current state of this heap so that i can retrieve kth GNN directly next time
+		kGNNHeap = heap;
+		kGNNHeapEntry= he;
+		latestSon=son;
+
+		//delete he;
 	}
-	delete heap;
+	//delete heap;
 }
 //END
 
+void RTree::retrieve_kth_BFN_GNNQ( double *_rslt){
+		Heap *heap = new Heap();
+		heap =kGNNHeap;
+		//get next entry from the heap----------------------------
+		HeapEntry *he = new HeapEntry();
+		he =kGNNHeapEntry;
+		bool again = true;
+		int son = latestSon;
+		while (again)
+		{
+			again = false;
+			if (!heap->remove(he))  //heap is empty
+				son = -1;
+			else
+			{
+				if (he->level == 0) //p is an object
+				{
+					_rslt[0] = he->x1;
+					_rslt[1] = he->y1;
+					//printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					son=-1;
+
+				}
+				else
+				{
+					son=he->son1;
+
+				}
+			}
+		}
+
+		
+		//Storing the current state of this heap so that i can retrieve kth GNN directly next time
+		kGNNHeap =heap;
+		kGNNHeapEntry= he;
+		latestSon=son;
+
+
+}
 
 // The following code was copied from the implementation of TP-kNN queries from Tony
 void RTree::TPNN_TP(float *_qline, int _k, Entry *_nn, Entry *_rslt, float _max_trvl)

@@ -19,12 +19,19 @@ class OGNN
 {
 public:
 	void ognnMultiPointApproach(Point2D queryPoints[],int numOfQueryPoints,int k,double kNearestNeighbor[][2],RTree* rt_obstacle,RTree* rt_dataPoints);
-	void onnMultiPointApproach(Point2D queryPoints,double kNearestNeighbor[][2],RTree* rt_obstacle,RTree* rt_dataPoints);
+	
 
-	double computeObstructedDistance(VisibilityGraph* initialVisGraph,Point2D p,Point2D q,RTree* rt_obstacle,vector<string> obstacleString);
+	double computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p,float* q,RTree* rt_obstacle,vector<string> obstacleString);
 	SortedLinList* obsInRange(RTree* rt_obstacle,float *mbr);
-	void writeDataPointPolygonInFile(Point2D p,Point2D q,SortedLinList *res_list);
+	void writeDataPointPolygonInFile(float* p,float* q,SortedLinList *res_list);
 	void constructInitialVisGraph(VisibilityGraph* initialVisGraph);
+	void writePointInFile(double* p);
+	void updateVisGraphFromFile(VisibilityGraph* initialVisGraph);
+	double computeEuclideanGroupDistance(float* kNN_point,std::vector < MyStruct >& queryPoints_sorted,int numOfQueryPoints,Point2D queryPoints[] );
+	double computeObsDistanceForTheFarthestQueryPoint(float* kNN_point,std::vector < MyStruct >& queryPoints_sorted, RTree* rt_obstacle,int i,Point2D queryPoints[],
+												VisibilityGraph* initialVisGraph  );
+	double computeObsDistanceForOtherQueryPoints(float* kNN_point,std::vector < MyStruct >& queryPoints_sorted,VisibilityGraph* initialVisGraph,
+												   double oldAggregateObstructedDistance,int numOfQueryPoints,RTree* rt_obstacle);
 };
 
 

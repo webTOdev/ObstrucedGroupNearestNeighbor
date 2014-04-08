@@ -1680,6 +1680,54 @@ void generate_input() {
 
 }
 
+void createDataPointFile(){
+	double temp,x1,x2,y1,y2;
+	long id=0;
+	char* dataPointFile="Datasets/Greece/rivers/rivers.txt";
+
+	FILE * output = fopen(DATAFILE, "w");
+	if (output == NULL) {
+			printf("Cannot open file %s", DATAFILE);
+	}
+	ifstream iFile(dataPointFile);
+	string line;
+
+	while (getline(iFile, line)) {
+		//cout << line << endl;
+		 std::istringstream in(line);
+		 in >> temp >> x1 >> x2 >> y1 >> y2;
+		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x1,x1,y1,y1);
+		 id++;
+		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x2,x2,y2,y2);
+		 id++;
+	}
+	iFile.close();
+	fclose(output);
+
+
+}
+
+void createMBRFile(){
+	double temp,x1,x2,y1,y2;
+	int id=0;
+	char* dataPointFile="Datasets/Greece/roads_1/roads.txt";
+
+	ifstream iFile(dataPointFile);
+	ofstream oFile(DATAFILE_MBR);
+	string line;
+
+	while (getline(iFile, line)) {
+		// cout << line << endl;
+		oFile << line <<"\n";
+
+	}
+	iFile.close();
+	oFile.close();
+
+
+
+}
+
 void range_test(RTree* srt){
 
 	float mbr[4];
@@ -1702,27 +1750,35 @@ int main(int argc, char* argv[]) {
 	int blocksize = 1024;			//4096;//1024;//4096;
 	int b_length = 1024;
 
-	Cache *cache = new Cache(0, blocksize);
+	Cache *cache = new Cache(DEFAULT_C, blocksize);
 	int dimension = 2;
 
+	//Create sample input file
+	//createDataPointFile();
+	//createMBRFile();
+
+	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
 	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
-	rt->print_tree();
+	//rt->print_tree();
 
 	float m[2];
-	m[0] = 60;
-	m[1] = 30;
+	//m[0]=444966 ;
+	//m[1]=444983;
+	m[0]=50 ;
+	m[1]=50;
 
 	double nearestNeighbor[2];
-	//Load the R-Tree file Not working :(
-	//RTree *srt = new RTree(TREEFILE, cache);
+
+
+	RTree *srt = new RTree(TREEFILE, cache);
+	//srt->print_tree();
 	//Nearest Neighbor query
-	rt->Point_BFN_NNQ(m, nearestNeighbor);
+	/*rt->Point_BFN_NNQ(m, nearestNeighbor);
 	printf("Nearest Neighbor of %f,%f is %f,%f\n", m[0], m[1],
 			nearestNeighbor[0], nearestNeighbor[1]);
-
+*/
 
 //	range_test(rt);
-
 
 	float queryPoints[3][2];
 	queryPoints[0][0] = 10;
@@ -1732,14 +1788,14 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][0] = 8;
 	queryPoints[2][1] = 8;
 
-	rt->Point_BFN_GNNQ(queryPoints,nearestNeighbor,3);
+	//rt->Point_BFN_GNNQ(queryPoints,nearestNeighbor,3);
 /*	printf("Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
 			nearestNeighbor[0], nearestNeighbor[1]);
 */
 	int k=3;
-	double kNearestNeighbor[k][2];
-	rt->Point_BFN_kGNNQ(queryPoints,k,kNearestNeighbor,3);
+	double kNearestNeighbor[3][2];
+//	rt->Point_BFN_kGNNQ(queryPoints,k,kNearestNeighbor,3);
 	for(int i=0;i<k;i++){
 /*	printf("%d-Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", k,queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
@@ -1747,23 +1803,28 @@ int main(int argc, char* argv[]) {
 */
 	}
 	Cache *cache_obs = new Cache(0,blocksize);
+	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
 	RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
-	rt_obs->print_tree();
+	//rt_obs->print_tree();
 	//range_test(rt_obs);
 
+	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	//srt_obs->print_tree();
 	OGNN *ognn = new OGNN();
-	m[0]=60;
-	m[1]=30;
-	ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
+
+//	m[0]=30 ;
+	//	m[1]=60;
+	//ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
+	ognn->ognnMultiPointApproach(queryPoints,3,2,kNearestNeighbor, rt_obs,rt);
 
 
-	//delete cache;
-	delete rt;
+	delete cache;
+	//delete rt;
 
 
 
-	//delete cache_obs;
-	delete rt_obs;
+	delete cache_obs;
+	//delete rt_obs;
 	//delete ognn;
 
 	//generate_input();
@@ -1773,10 +1834,10 @@ int main(int argc, char* argv[]) {
 	//exp_vary_R_AREA("Z");
 	//exp_vary_DATASET("Z");
 
-	char s1[100], s2[100], ws[100], s3[100], s4[100];
+	//char s1[100], s2[100], ws[100], s3[100], s4[100];
 	//Exp_sum_stat max_e;
-	strcpy(s1, "Results/InputFile/input1");
-	strcpy(s2, "Results/InputFile/input2");
+	//strcpy(s1, "Results/InputFile/input1");
+	//strcpy(s2, "Results/InputFile/input2");
 
 	//RTree *rt = new RTree(TREEFILE, b_length, cache, dimension);
 

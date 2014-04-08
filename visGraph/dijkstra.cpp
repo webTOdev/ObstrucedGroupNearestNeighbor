@@ -10,12 +10,12 @@
 #include<vector>
 #include<set>
 #include "dijkstra.h"
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 
 const int infty = 1000000000; // limit
-const int MAX_NUM_VERTEX=pow(2,16);
+int MAX_NUM_VERTEX=pow(2.0,16.0);
 int verticesNum;
 int edgesNum;
 vector< vector< pair<int, double> > > comparisionMatrix;
@@ -45,15 +45,15 @@ void prim_dijkstra(int s) //s starting point
     double c;
 
     pathWeight.clear();
-    pathWeight.resize(verticesNum, infty);
+    pathWeight.resize(MAX_NUM_VERTEX, infty);
     pathWeight[s] = 0;
 
-	prev = new int[verticesNum];
-	smallestPath=new int[verticesNum];
+	prev = new int[MAX_NUM_VERTEX];
+	smallestPath=new int[MAX_NUM_VERTEX];
 
 
     kopiec.clear();
-    for (int i = 0; i < verticesNum; i++) { //throw vertices, k to the mound
+    for (int i = 0; i < MAX_NUM_VERTEX; i++) { //throw vertices, k to the mound
         kopiec.insert(i);
         prev[i]=-1;
         smallestPath[i]=-1;
@@ -85,12 +85,13 @@ void prim_dijkstra(int s) //s starting point
 }
 
 
-double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int destination) {
+double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int destination,int maxVertexNum) {
     int a, b, s, g;
     double c;
     FILE *input = fopen("test.txt", "r+");
     verticesNum = numVertice;
     edgesNum=numEdges;
+	MAX_NUM_VERTEX=maxVertexNum;
     //printf("Vertice Num %d , Edge Num %d\n",verticesNum,edgesNum);
     comparisionMatrix.resize(MAX_NUM_VERTEX); // first edge ™ will turn
 
@@ -109,7 +110,7 @@ double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int
     printf("[ALgorithm DIJKSTRA] : The cost of the minimum path from %d to %d %s is %lf\n", s, g, (directed)?"directed":"", pathWeight[g]); // index 5 czyli v nr 6
     printPath(g);
     printf("\n");
-
+	fclose(input);
     return pathWeight[g];
 }
 
