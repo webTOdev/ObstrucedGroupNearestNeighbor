@@ -1815,7 +1815,7 @@ int main(int argc, char* argv[]) {
 //	m[0]=30 ;
 	//	m[1]=60;
 	//ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
-	ognn->ognnMultiPointApproach(queryPoints,3,5,kNearestNeighbor, rt_obs,rt);
+	ognn->ognnMultiPointApproach(queryPoints,3,2,kNearestNeighbor, rt_obs,rt);
 
 
 	delete cache;
