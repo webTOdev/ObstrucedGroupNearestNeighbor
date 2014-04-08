@@ -15,7 +15,7 @@ struct MyStruct
     double distance;
     float* queryPoints;
 
-	MyStruct(double d , Point2D q) { distance = d; queryPoints =  q ;}
+	MyStruct(double d , float* q) { distance = d; queryPoints =  q ;}
 };
 //Use this struct to sort  q according to distance descending
 struct more_than_key

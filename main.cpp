@@ -1750,7 +1750,7 @@ int main(int argc, char* argv[]) {
 	int blocksize = 1024;			//4096;//1024;//4096;
 	int b_length = 1024;
 
-	Cache *cache = new Cache(0, blocksize);
+	Cache *cache = new Cache(DEFAULT_C, blocksize);
 	int dimension = 2;
 
 	//Create sample input file
@@ -1769,8 +1769,9 @@ int main(int argc, char* argv[]) {
 
 	double nearestNeighbor[2];
 
+
 	RTree *srt = new RTree(TREEFILE, cache);
-//	rt->print_tree();
+	//srt->print_tree();
 	//Nearest Neighbor query
 	/*rt->Point_BFN_NNQ(m, nearestNeighbor);
 	printf("Nearest Neighbor of %f,%f is %f,%f\n", m[0], m[1],
@@ -1808,13 +1809,13 @@ int main(int argc, char* argv[]) {
 	//range_test(rt_obs);
 
 	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
-//	rt_obs->print_tree();
+	//srt_obs->print_tree();
 	OGNN *ognn = new OGNN();
 
 //	m[0]=30 ;
 	//	m[1]=60;
 	//ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
-	ognn->ognnMultiPointApproach(queryPoints,3,3,kNearestNeighbor, rt_obs,rt);
+	ognn->ognnMultiPointApproach(queryPoints,3,5,kNearestNeighbor, rt_obs,rt);
 
 
 	delete cache;

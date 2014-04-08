@@ -197,5 +197,3 @@ void Heap::init(int _dim, int _hsize)
 	used = 0;
 	maxused=0;
 }
-//------------------------------------------
-	
