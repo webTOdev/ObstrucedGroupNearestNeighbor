@@ -163,6 +163,35 @@ public:
 	;
 };
 
+//Added By Nusrat
+class Exp_stat {
+public:
+	//Input parameter
+	int k;
+	int grpsize;
+
+
+	//Output parameter
+	long double stime_sec;
+	long double io_access;
+	long double page_faults;
+
+
+	Exp_stat() {
+		k = DEFAULT_K;
+		grpsize = DEFAULT_GRPSIZE;
+	
+		stime_sec = 0.0;
+		io_access=0.0;
+		page_faults = 0.0;
+		
+	}
+	;
+	~Exp_stat() {
+	}
+	;
+};
+
 // Process
 void rect_kGNN_query_max(int n_sample, int g_size, int k, char *s1, char *s2,
 		Exp_sum_stat *max_e) {
@@ -1707,6 +1736,28 @@ void createDataPointFile(){
 
 }
 
+bool intersects(float* mbr,float* bounces){
+	
+	bool inside;
+    bool overlap;
+
+    overlap = TRUE;
+    inside = TRUE;
+
+	for (int i = 0; i < 2; i++)
+    {
+    	//printf("if (mbr[%d] > bounces[%d] ||  mbr[%d] < bounces[%d]) == %f>%f || %f>%f   (overlap=false)\n",2*i,2*i+1,2 * i + 1,2*i,mbr[2*i],bounces[2*i+1],mbr[2 * i + 1],bounces[2*i]);
+		if (mbr[2 * i] > bounces[2 * i + 1] ||  mbr[2 * i + 1] < bounces[2 * i])
+			overlap = FALSE;
+		//printf("if (mbr[%d] > bounces[%d] ||  mbr[%d] < bounces[%d]) == %f>%f || %f>%f   (inside=false)\n",2*i,2*i,2 * i + 1,2*i+1,mbr[2*i],bounces[2*i],mbr[2 * i + 1],bounces[2*i+1]);
+		if (mbr[2 * i] < bounces[2 * i] || mbr[2 * i + 1] > bounces[2 * i + 1])
+			inside = FALSE;
+    }
+	if(overlap || inside){
+		return true;
+	}
+}
+
 void createMBRFile(){
 	double temp,x1,x2,y1,y2;
 	int id=0;
@@ -1742,6 +1793,54 @@ void range_test(RTree* srt){
 
 	delete res_list;
 
+}
+
+//Experiments
+void print_output(char *s1, Exp_stat *e) {
+	//write in output file
+
+	FILE * outputFile1;
+	outputFile1 = fopen(s1, "a+");
+
+	char test;
+
+	if (outputFile1 == NULL) {
+		printf("Error writing output\n");
+		//char s;
+		//scanf("%c",&s);
+	}
+
+	fprintf(outputFile1,
+			"k = %d\tgrp size =%d\ttime = %.5lf sec\tio_access=%.5lf\n",
+			e->k,
+			e->grpsize, 
+			e->stime_sec / (1.0 * CLOCKS_PER_SEC * SAMPLE),
+			e->io_access
+);
+	//for(int j=0; j<g; j++)
+	//fprintf(outputFile2,"%d\t%.5lf\n", j, e->cnum_retrievals[j]/SAMPLE);
+
+	fclose(outputFile1);
+}
+
+void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][2],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache){
+	Stopwatch sw1;
+	Exp_stat *sum_e=new Exp_stat();
+	sum_e->k=k;
+	sum_e->grpsize=groupSize;
+	int last_pf = cache->page_faults;
+	//..........
+
+		
+	sw1.start();
+	OGNN *ognn = new OGNN();
+	ognn->ognnMultiPointApproach(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt);
+	sw1.stop();
+	sum_e->stime_sec += sw1.getDiff();
+	sum_e->io_access += rt->io_access+rt_obs->io_access;
+//	sum_e->page_faults += cache->page_faults - last_pf;
+
+	print_output("result_sum.txt",sum_e);
 }
 //----------------------------------- main -----------------------------------
 int main(int argc, char* argv[]) {
@@ -1810,12 +1909,15 @@ int main(int argc, char* argv[]) {
 
 	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
 	//srt_obs->print_tree();
-	OGNN *ognn = new OGNN();
+	
 
 //	m[0]=30 ;
 	//	m[1]=60;
 	//ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
-	ognn->ognnMultiPointApproach(queryPoints,3,2,kNearestNeighbor, rt_obs,rt);
+
+	int group_size=3;
+
+	exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, rt_obs,rt,cache_obs,cache);
 
 
 	delete cache;
@@ -1824,6 +1926,50 @@ int main(int argc, char* argv[]) {
 
 
 	delete cache_obs;
+
+/*	float r1[4];
+	float r2[4];
+	r1[0]=0;
+	r1[1]=10;
+	r1[2]=0;
+	r1[3]=10;
+
+	
+	r2[0]=30;
+	r2[1]=50;
+	r2[2]=0;
+	r2[3]=20;
+
+	cout<<"Intersect? "<<intersects(r1,r2)<<endl;
+	 FILE *input1,*input2;
+	  input1 = fopen( "Datasets/Greece/roads_1/roads.txt", "r");
+	
+
+	 if (input1 == NULL)
+	 {
+	 printf("Error reading rectdata\n");
+	 }
+		int x,y;
+	 for(int i=0; i<100; i++)
+	 {
+		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
+		//printf("i %f,%f,%f,%f\n",r1[0],r1[1],r1[2],r1[3]);
+		input2 = fopen( "Datasets/Greece/roads_1/roads.txt", "r");
+		for(int j=0; j<100; j++)
+		{
+			
+			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[1],&r2[2],&r2[3]);
+			//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
+			cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
+			
+		}
+		fclose(input2);
+
+		
+	}
+
+	
+*/
 	//delete rt_obs;
 	//delete ognn;
 
@@ -1942,3 +2088,4 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+

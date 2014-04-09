@@ -16,7 +16,7 @@
 
 
 //Added by Tanzima
-extern int io_access;
+//extern int io_access;
 extern int disktime;
 extern int updatetime;
 extern int counttime;
@@ -26,6 +26,7 @@ extern int kmintime;
 RTree::RTree(char *fname, int _b_length, Cache *c, int _dimension)
   //use this constructor to build a new tree
 {
+	io_access=0;  
     file = new BlockFile(fname, _b_length);
     cache = c;
 
@@ -53,7 +54,9 @@ RTree::RTree(char *fname, int _b_length, Cache *c, int _dimension)
 RTree::RTree(char *fname, Cache *c)
   //use this constructor to restore a tree from a file
 {
-    int j;
+    //Nusrat
+	io_access=0;    
+	int j;
 
     file = new BlockFile(fname, 0);
     cache =c;
@@ -72,7 +75,8 @@ RTree::RTree(char *fname, Cache *c)
 RTree::RTree(char *inpname, char *fname, int _b_length, Cache *c, int _dimension)
   // construct new R-tree from a specified input textfile with rectangles
 {
-    Entry *d;
+	io_access=0;      
+	Entry *d;
     FILE *fp;
     file = new BlockFile(fname, _b_length);
     cache =c;
@@ -1024,6 +1028,7 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt){
 		he =kGNNHeapEntry;
 		bool again = true;
 		int son = latestSon;
+		io_access++;
 		while (again)
 		{
 			again = false;

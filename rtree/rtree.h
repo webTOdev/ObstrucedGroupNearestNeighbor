@@ -119,11 +119,14 @@ public:
 	void Point_BFN_kGNNQ(Point2D o[],int k,double _rslt[][2],int numOfQueryPoints);
 	void retrieve_kth_BFN_GNNQ( double *_rslt);
 
+	int io_access;
+
 private:
 		//These two entries to store the current state of the heap
 	Heap *kGNNHeap;
 	int latestSon ;
     HeapEntry *kGNNHeapEntry;
+	
 
 };
 
