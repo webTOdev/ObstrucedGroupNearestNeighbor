@@ -119,7 +119,7 @@ RTree::RTree(char *inpname, char *fname, int _b_length, Cache *c, int _dimension
 
 		printf("inserting object %d", record_count);
 
-    	fscanf(fp, "%d %f %f %f %f \n", &id, &x0, &y0, &x1, &y1);
+    	fscanf(fp, "%d %f %f %f %f \n", &id, &x0, &x1, &y0, &y1);
     	d = new Entry(dimension, NULL);
     	d -> son = id;
     	d -> bounces[0] = x0;
@@ -792,7 +792,7 @@ void RTree::Point_BFN_NNQ(Point2D o, double *_rslt)
 			o1[0]=(float)o[0];
 			o1[1]=(float)o[1];
 			float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
-		//	printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
+			printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
 
 			HeapEntry *he = new HeapEntry();
 			he -> key = edist;
@@ -1029,7 +1029,7 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt){
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
-					//printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 
 				}
