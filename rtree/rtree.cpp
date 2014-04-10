@@ -72,11 +72,13 @@ RTree::RTree(char *fname, Cache *c)
     root_ptr = NULL;
 }
 //------------------------------------------------------------
+//------------------------------------------------------------
 RTree::RTree(char *inpname, char *fname, int _b_length, Cache *c, int _dimension)
   // construct new R-tree from a specified input textfile with rectangles
 {
-	io_access=0;      
-	Entry *d;
+    long id;
+    float x0,y0,x1,y1;
+    Entry *d;
     FILE *fp;
     file = new BlockFile(fname, _b_length);
     cache =c;
@@ -99,9 +101,6 @@ RTree::RTree(char *inpname, char *fname, int _b_length, Cache *c, int _dimension
     root_ptr -> level = 0;
     root = root_ptr->block;
 
-	//added for TP KNN----------------------------------------
-	tpheap=NULL;
-
 	int record_count = 0;
 
     if((fp = fopen(inpname,"r")) == NULL)
@@ -115,34 +114,24 @@ RTree::RTree(char *inpname, char *fname, int _b_length, Cache *c, int _dimension
       {
 		record_count ++;
 
-		d = new Entry(dimension, NULL);
+		for (int i = 0; i < 79; i ++)  //clear a line
+		  printf("\b");
 
-    	fscanf(fp, "%d", &(d -> son));
-		//printf("ID=%d ",d->son);
-		//for (int i = 0; i < 2 * dimension; i ++)
-		//{
-			//fscanf(fp, " %f", &(d -> bounces[i]));
-		    fscanf(fp, " %f %f %f %f", &(d->bounces[0]),
-		 	&(d->bounces[1]), &(d->bounces[2]), &(d->bounces[3]));
-		//}
-		//fscanf(fp, "\n");
+		printf("inserting object %d", record_count);
 
-		//if(record_count==20000 || record_count==20001)	printf(": %f %f %f %f\n", d->bounces[0], d->bounces[2], d->bounces[1], d->bounces[3]);
+    	fscanf(fp, "%d %f %f %f %f \n", &id, &x0, &y0, &x1, &y1);
+    	d = new Entry(dimension, NULL);
+    	d -> son = id;
+    	d -> bounces[0] = x0;
+    	d -> bounces[1] = x1;
+    	d -> bounces[2] = y0;
+    	d -> bounces[3] = y1;
+
     	insert(d);
-
 		  //d will be deleted in insert()
-
-		if (record_count % 100 == 0)
-		{
-			for (int i = 0; i < 79; i ++)  //clear a line
-				printf("\b");
-
-			printf("inserting object %d", record_count);
-		}
       }
     }
-	//TANZIMA
-	printf("inserting object %d", record_count);
+
 	fclose(fp);
 
 	printf("\n");
