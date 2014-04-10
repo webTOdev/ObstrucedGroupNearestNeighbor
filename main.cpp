@@ -1724,10 +1724,14 @@ void createDataPointFile(){
 	while (getline(iFile, line)) {
 		//cout << line << endl;
 		 std::istringstream in(line);
-		 in >> temp >> x1 >> x2 >> y1 >> y2;
+		 in >> temp >> x1 >> y1 >> x2 >> y2;
 		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x1,x1,y1,y1);
 		 id++;
+		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x2,x2,y1,y1);
+		 id++;
 		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x2,x2,y2,y2);
+		 id++;
+		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x1,x1,y2,y2);
 		 id++;
 	}
 	iFile.close();
@@ -1760,20 +1764,28 @@ bool intersects(float* mbr,float* bounces){
 
 void createMBRFile(){
 	double temp,x1,x2,y1,y2;
-	int id=0;
+	int id;
+
 	char* dataPointFile="Datasets/Greece/roads_1/roads.txt";
 
 	ifstream iFile(dataPointFile);
-	ofstream oFile(DATAFILE_MBR);
+
+	FILE * output = fopen(DATAFILE_MBR, "w");
+	if (output == NULL) {
+			printf("Cannot open file %s", DATAFILE);
+	}
 	string line;
 
 	while (getline(iFile, line)) {
-		// cout << line << endl;
-		oFile << line <<"\n";
+		//cout << line << endl;
+		 std::istringstream in(line);
+		 in >> id >> x1 >> y1 >> x2 >> y2;
+		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x1,x2,y1,y2);
 
 	}
 	iFile.close();
-	oFile.close();
+	fclose(output);
+
 
 
 
@@ -1858,6 +1870,7 @@ int main(int argc, char* argv[]) {
 	//createMBRFile();
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
 	//RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
+	//rt->print_tree();
 	//delete rt;
 
 	Cache *cache_obs = new Cache(0,blocksize);
@@ -1882,10 +1895,10 @@ int main(int argc, char* argv[]) {
 
 	//srt->print_tree();
 	//Nearest Neighbor query
-	/*rt->Point_BFN_NNQ(m, nearestNeighbor);
-	printf("Nearest Neighbor of %f,%f is %f,%f\n", m[0], m[1],
-			nearestNeighbor[0], nearestNeighbor[1]);
-*/
+	//srt->Point_BFN_NNQ(m, nearestNeighbor);
+	//printf("Nearest Neighbor of %f,%f is %f,%f\n", m[0], m[1],
+	//		nearestNeighbor[0], nearestNeighbor[1]);
+
 
 //	range_test(rt);
 
@@ -1919,9 +1932,18 @@ int main(int argc, char* argv[]) {
 	//ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
 
 	int group_size=3;
+	queryPoints[0][0] = 506364;
+	queryPoints[0][1] = 4583290;
+	queryPoints[1][0] = 501098;
+	queryPoints[1][1] = 4582444;
+	queryPoints[2][0] = 501774;
+	queryPoints[2][1] = 4581595;
 
-	exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache);
-
+	//change k
+	for (int k = 2; k <= 10; k = k + INTERVAL_K) {
+		printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
+		exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache);
+	}
 
 	delete cache;
 	delete srt;
@@ -1956,13 +1978,13 @@ int main(int argc, char* argv[]) {
 		int x,y;
 	 for(int i=0; i<100; i++)
 	 {
-		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
+		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[2],&r1[1],&r1[3]);
 		//printf("i %f,%f,%f,%f\n",r1[0],r1[1],r1[2],r1[3]);
 		input2 = fopen( "Datasets/Greece/roads_1/roads.txt", "r");
 		for(int j=0; j<100; j++)
 		{
 			
-			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[1],&r2[2],&r2[3]);
+			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[2],&r2[1],&r2[3]);
 			//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
 			cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
 			
@@ -1973,7 +1995,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	
-*/
+
 	//delete rt_obs;
 	//delete ognn;
 

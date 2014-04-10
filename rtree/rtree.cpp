@@ -792,7 +792,7 @@ void RTree::Point_BFN_NNQ(Point2D o, double *_rslt)
 			o1[0]=(float)o[0];
 			o1[1]=(float)o[1];
 			float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
-			printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
+			//printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
 
 			HeapEntry *he = new HeapEntry();
 			he -> key = edist;
@@ -941,7 +941,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 			float o1[2];
 			float gnnMinDist=0;
 			//Find min Group distance
-
+			printf(" %d ",i);
 			for(int j=0;j<numOfQueryPoints;j++){
 				o1[0] = (float) o[j][0];
 				o1[1] = (float) o[j][1];
@@ -949,6 +949,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
 				gnnMinDist+=edist;
 				//printf("%f,%f has mindist %f\n",o1[0],o1[1],edist);
+				
 			}
 
 			//printf("Entry %d : mindist %f\n",i,gnnMinDist);
@@ -984,7 +985,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				{
 					_rslt[indexOfGNNRetrieved][0] = he->x1;
 					_rslt[indexOfGNNRetrieved][1] = he->y1;
-					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 					indexOfGNNRetrieved++;
 

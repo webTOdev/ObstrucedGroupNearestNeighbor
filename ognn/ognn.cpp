@@ -158,6 +158,7 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][2], RTree* rt_obstacle,
 		RTree* rt_dataPoints) {
 
+	printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");
 	double nearestNeighbor[2];
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,
@@ -175,7 +176,7 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 
 	//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,egnn_sorted;
-	
+	printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
 	float *kNN_point,*q;
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	for(int i=0;i<k;i++){
