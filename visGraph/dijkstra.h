@@ -9,10 +9,13 @@
 #define DIJKSTRA_H_
 
 #include <iostream>
+#include<vector>
+
+using namespace std;
 
 double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int destination,int maxVertexNum);
 void printPath(int dest);
 void prim_dijkstra(int s);
-int * getShortestPath();
+vector<int> getShortestPath();
 
 #endif /* DIJKSTRA_H_ */

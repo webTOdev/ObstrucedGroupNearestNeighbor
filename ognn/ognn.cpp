@@ -269,6 +269,19 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		removeDataPointFromVG(initialVisGraph,kNN_point);
 	}
 
+	/*//Sort the Euclidean GNN
+	std::sort(egnn_sorted.begin(), egnn_sorted.end(), less_than_key());
+
+	printf("\nFinal K-Euclidean Group Nearest Neighbor\n");
+		for(int index=0;index<k;index++){
+		//printf("\n(%f,%f) has distance %f\n",queryPoints_sorted[j].queryPoints[0],queryPoints_sorted[j].queryPoints[1],queryPoints_sorted[j].distance);
+			q = new float[2];
+			q[0]=egnn_sorted[index].queryPoints[0];
+			q[1]=egnn_sorted[index].queryPoints[1];
+
+			printf("k=%d, (%f,%f) distance %lf \n",index,q[0], q[1],egnn_sorted[index].distance);
+	}*/
+
 	//Sort the Obstructed GNN
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
 

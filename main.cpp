@@ -1848,17 +1848,29 @@ int main(int argc, char* argv[]) {
 	//Create an RTree
 	int blocksize = 1024;			//4096;//1024;//4096;
 	int b_length = 1024;
-
-	Cache *cache = new Cache(DEFAULT_C, blocksize);
 	int dimension = 2;
+
+	Cache *cache = new Cache(0, blocksize);
+
 
 	//Create sample input file
 	//createDataPointFile();
 	//createMBRFile();
-
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
-	//rt->print_tree();
+	//RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
+	//delete rt;
+
+	Cache *cache_obs = new Cache(0,blocksize);
+	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
+	//RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
+	//rt_obs->print_tree();
+	//range_test(rt_obs);
+	//delete rt_obs;
+
+	RTree *srt = new RTree(TREEFILE,  cache);
+	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	//srt_obs->print_tree();
+
 
 	float m[2];
 	//m[0]=444966 ;
@@ -1868,8 +1880,6 @@ int main(int argc, char* argv[]) {
 
 	double nearestNeighbor[2];
 
-
-	RTree *srt = new RTree(TREEFILE, cache);
 	//srt->print_tree();
 	//Nearest Neighbor query
 	/*rt->Point_BFN_NNQ(m, nearestNeighbor);
@@ -1901,14 +1911,7 @@ int main(int argc, char* argv[]) {
 			kNearestNeighbor[i][0], kNearestNeighbor[i][1]);
 */
 	}
-	Cache *cache_obs = new Cache(0,blocksize);
-	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
-	//rt_obs->print_tree();
-	//range_test(rt_obs);
 
-	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
-	//srt_obs->print_tree();
 	
 
 //	m[0]=30 ;
@@ -1917,15 +1920,16 @@ int main(int argc, char* argv[]) {
 
 	int group_size=3;
 
-	exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, rt_obs,rt,cache_obs,cache);
+	exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache);
 
 
 	delete cache;
-	//delete rt;
+	delete srt;
 
 
 
 	delete cache_obs;
+	delete srt_obs;
 
 /*	float r1[4];
 	float r2[4];

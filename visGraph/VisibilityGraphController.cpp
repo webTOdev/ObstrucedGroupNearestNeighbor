@@ -7,7 +7,8 @@
 
 #include "VisibilityGraphController.h"
 #include <map>
-
+double W_I_1_X=-11111;
+double W_I_1_Y=-11111;
 
 tLinestring createHorizontalLine(Point* p);
 tLinestring createLineString(Line* line);
@@ -37,6 +38,13 @@ VisibilityGraphController::VisibilityGraphController(VisibilityGraph* vg){
 
 VisibilityGraphController::~VisibilityGraphController() {
 	// TODO Auto-generated destructor stub
+}
+bool firstIteration(Point* w_i_1){
+	if(w_i_1->x==W_I_1_X && w_i_1->y==W_I_1_Y)
+	{
+		return true;
+	}
+	return false;
 }
 
 vector<Line*> VisibilityGraphController::constructVisGraph(){
@@ -78,7 +86,7 @@ vector<Line*> VisibilityGraphController::visibleVertices(Point* ori){
 		}
 	}
 		 //Print the angles
-	    // std::cout << "Points sorted List by Angle: " << std::endl;
+	     //std::cout << "Points sorted List by Angle: " << std::endl;
 	     key_index_t& kindex = angles.get<key_tag>();
 	     for( key_index_t::iterator k = kindex.begin(); k != kindex.end(); ++k ){
 	        //std::cout << "Point :"<< k->second->id << " ==> " << k->first << std::endl;
@@ -136,13 +144,11 @@ vector<Line*> VisibilityGraphController::generateVisibleEdge(angleContainer angl
 
 	int index=1;
 	//Keep the earlier Point
-	Point* w_i_1 = new Point(-111111,-111111);//dummy value
+	Point* w_i_1 = new Point(W_I_1_X,W_I_1_Y);//dummy value
 	//Find the visibility of other points for a given point
 	  key_index_t& kindex = angles.get<key_tag>();
 	  for( key_index_t::iterator k = kindex.begin(); k != kindex.end(); ++k ){
 		  //Prints the edge list before each iteration
-		  //  printEdgeList(edges);
-
 		  Point* w_i=k->second;
 		  if(index!=1){
 			  w_i_1=(--k)->second;
@@ -157,7 +163,7 @@ vector<Line*> VisibilityGraphController::generateVisibleEdge(angleContainer angl
 			  w_i->visited=true;
 			  ori->addVisible(w_i);
 			  visibleEdges.push_back(new Line(ori,w_i));
-			 // std::cout<<"Visible Edges "<<ori->id<<"->"<<w_i->id<<std::endl;
+			  //std::cout<<"Visible Edges "<<ori->id<<"->"<<w_i->id<<std::endl;
 		  }
 		  //Check for clockwise side edges
 		  //Each points has two edge associated and thats why two new points
@@ -306,7 +312,7 @@ bool VisibilityGraphController::isVisible(Point* w_i,Point* ori,Line* sweepLine,
 	//std::cout <<"Sweep Line " << " ==> " << sweepLine->a->id<<","<<sweepLine->b->id << std::endl;
 	tPolygon poly=getObsCoveringPoint(w_i,obstacleList)->poly;
 	if(doesLineAndPolygonIntersects(line,poly,w_i,ori,obstacleList)){
-		// std::cout <<"At Line 1" << std::endl;
+		 //std::cout <<"At Line 1" << std::endl;
 		return false;
 	}
 	if(i==1 || !checkCoLinear(sweepLine->a,w_i_1,sweepLine->b)){
@@ -316,34 +322,38 @@ bool VisibilityGraphController::isVisible(Point* w_i,Point* ori,Line* sweepLine,
 		 if(!edges.empty()){
 			 key_index_edge& kindex = edges.get<key_tag>();
 			 e=kindex.begin()->second;
-			// std::cout <<"First Line in Edge List " << " ==> " << e->id << std::endl;
+			 //std::cout <<"First Line in Edge List " << " ==> " << e->id << std::endl;
 			 tLinestring eLine=createLineString(e);
 			 bool b = boost::geometry::intersects(line,eLine);
 
 			 if(b){
 				 //Two line just touched does not intersects
 				 if(!doesTwoLineTouches(line,eLine,w_i,ori,obstacleList)){
-					// std::cout <<"At Line 4" << std::endl;
+					 //std::cout <<"At Line 4" << std::endl;
 					 return false;
 				 }
 				 else{
-					// std::cout <<"At Line 5.1" << std::endl;
+					 //std::cout <<"At Line 5.1" << std::endl;
 					 return true;
 				 }
 			 }
 			 else{
-				// std::cout <<"At Line 4.5 and edge list not empty" << std::endl;
+				 //std::cout <<"At Line 4.5 and edge list not empty" << std::endl;
 				 return true;
 			 }
 		 }
 		 else{
-			// std::cout <<"At Line 5.2" << std::endl;
+			 //std::cout <<"At Line 5.2" << std::endl;
 			 return true;
 
 		 }
 	}
 	else{
-		// std::cout <<"At Line 6" << std::endl;
+		 //std::cout <<"At Line 6" << std::endl;
+		 //Dont want to check w_i_1's visibilitt with a dummy value , 
+		 //when w_i_1=dummy , means  no obstacles inside , //confusing!
+		if(firstIteration(w_i_1))
+			return true;
 		if(!ori->isVisible(w_i_1)){
 			return false;
 		}
@@ -369,6 +379,8 @@ bool VisibilityGraphController::isVisible(Point* w_i,Point* ori,Line* sweepLine,
 	}
 	return true;
 }
+
+
 
 //Search in which Obstacle this point lies
 Obstacle* getObsCoveringPoint(Point* w_i,vector<Obstacle*> obsList){
