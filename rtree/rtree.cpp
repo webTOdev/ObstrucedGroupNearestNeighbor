@@ -941,7 +941,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 			float o1[2];
 			float gnnMinDist=0;
 			//Find min Group distance
-			printf(" %d ",i);
+			//printf(" %d ",i);
 			for(int j=0;j<numOfQueryPoints;j++){
 				o1[0] = (float) o[j][0];
 				o1[1] = (float) o[j][1];
@@ -975,19 +975,27 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 		bool again = true;
 		while (again)
 		{
-			if(indexOfGNNRetrieved==k-1)
+			//if(indexOfGNNRetrieved==k-1)
 			again = false;
 			if (!heap->remove(he))  //heap is empty
-				son = -1;
+				{
+					son = -1;
+					//again=false;
+				}
 			else
 			{
 				if (he->level == 0) //p is an object
 				{
 					_rslt[indexOfGNNRetrieved][0] = he->x1;
 					_rslt[indexOfGNNRetrieved][1] = he->y1;
-					printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
-					son=-1;
+					//printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					if(indexOfGNNRetrieved==k-1)
+					{
+						son=-1;
+						break;
+					}
 					indexOfGNNRetrieved++;
+					again=true;
 
 				}
 				else
@@ -1030,7 +1038,7 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt){
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
-					printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					son=-1;
 
 				}
