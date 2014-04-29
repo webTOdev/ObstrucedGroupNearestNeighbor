@@ -55,7 +55,7 @@ RTree::RTree(char *fname, Cache *c)
   //use this constructor to restore a tree from a file
 {
     //Nusrat
-	io_access=0;    
+	io_access=0;  
 	int j;
 
     file = new BlockFile(fname, 0);
@@ -842,6 +842,185 @@ void RTree::Point_BFN_NNQ(Point2D o, double *_rslt)
 }
 //END
 
+
+//Point Nearest Neighbor query
+void RTree::Rectangle_BFN_NNQ(Point2D o, double *_rslt)
+{
+	//init a heap for Rectangle BFS
+    rectangleNNHeap=new Heap();
+	rectangleNNHeap->init(dimension);
+	latestSonForRectangle=0;
+	
+	//init a heap that stores the non-leaf entries to be accessed-
+	Heap *heap = new Heap();
+	heap->init(dimension);
+	//------------------------------------------------------------
+	
+	int son = root; //this entry is to be visited next
+	while (son != -1)
+	{
+		RTNode *rtn = new RTNode(this, son);
+		io_access++;
+		for (int i = 0; i < rtn -> num_entries; i ++)
+		{
+			float o1[2];
+			o1[0]=(float)o[0];
+			o1[1]=(float)o[1];
+			float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
+			//printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
+
+			HeapEntry *he = new HeapEntry();
+			he -> key = edist;
+			he -> level = rtn -> level;
+			he -> son1 = rtn->entries[i].son;
+			he-> x1 = rtn->entries[i].bounces[0];
+			he-> x2 = rtn->entries[i].bounces[1];
+			he-> y1 = rtn->entries[i].bounces[2];
+			he-> y2 = rtn->entries[i].bounces[3];
+			heap -> insert(he);
+			delete he;			
+
+		}
+	
+		delete rtn;
+
+		
+		//get next entry from the heap----------------------------
+		HeapEntry *he = new HeapEntry();
+		bool again = true;
+		while (again)
+		{
+			again = false;
+			if (!heap->remove(he))  //heap is empty
+				son = -1;
+			else
+			{
+				if (he->level == 0) //p is an object 
+				{
+					_rslt[0] = he->x1;
+					_rslt[1] = he->x2;
+					_rslt[2] = he->y1;
+					_rslt[3] = he->y2;
+					//printf("Rectangle (%f,%f),(%f,%f) Mindist %f\n",he->x1,he->y1,he->x2,he->y2,he->key);
+					latestSonForRectangle=son;
+					son=-1;
+														
+				}
+				else
+				{
+					son=he->son1;
+					
+				}
+			}
+		}
+		
+		delete he;
+	}
+	rectangleNNHeap->copy(heap);
+	delete heap;
+}
+
+void RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
+		Heap *heap = new Heap();
+		heap->init(dimension);
+		heap->copy(rectangleNNHeap);
+		int son = latestSonForRectangle; //this entry is to be visited next
+
+		//If the heap already have some leaf nodes
+		//get next entry from the heap----------------------------
+		HeapEntry *he = new HeapEntry();
+
+		bool again = true;
+		while (again)
+		{
+			again = false;
+			if (!heap->remove(he))  //heap is empty
+				son = -1;
+			else
+			{
+				if (he->level == 0) //p is an object
+				{
+					_rslt[0] = he->x1;
+					_rslt[1] = he->x2;
+					_rslt[2] = he->y1;
+					_rslt[3] = he->y2;
+					//printf("Rectangle (%f,%f),(%f,%f) Mindist %f\n",he->x1,he->y1,he->x2,he->y2,he->key);
+					latestSonForRectangle=son;
+					son=-1;
+
+				}
+				else
+				{
+					son=he->son1;
+
+				}
+			}
+		}
+		delete he;
+		//Heap doesn't have  leaf nodes so need to reinsert
+		while (son != -1)
+		{
+			RTNode *rtn = new RTNode(this, son);
+			io_access++;
+			for (int i = 0; i < rtn -> num_entries; i ++)
+			{
+			float o1[2];
+			o1[0]=(float)o[0];
+			o1[1]=(float)o[1];
+			float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
+			//printf("%f %f %f %f edist %f\n",rtn->entries[i].bounces[0],rtn->entries[i].bounces[1],rtn->entries[i].bounces[2],rtn->entries[i].bounces[3],edist);
+
+			HeapEntry *he = new HeapEntry();
+			he -> key = edist;
+			he -> level = rtn -> level;
+			he -> son1 = rtn->entries[i].son;
+			he-> x1 = rtn->entries[i].bounces[0];
+			he-> x2 = rtn->entries[i].bounces[1];
+			he-> y1 = rtn->entries[i].bounces[2];
+			he-> y2 = rtn->entries[i].bounces[3];
+			heap -> insert(he);
+			delete he;			
+
+			}
+	
+		delete rtn;
+
+			//get next entry from the heap----------------------------
+		HeapEntry *he = new HeapEntry();
+
+		bool again = true;
+		while (again)
+		{
+			again = false;
+			if (!heap->remove(he))  //heap is empty
+				son = -1;
+			else
+			{
+				if (he->level == 0) //p is an object
+				{
+					_rslt[0] = he->x1;
+					_rslt[1] = he->x2;
+					_rslt[2] = he->y1;
+					_rslt[3] = he->y2;
+					//printf("Rectangle (%f,%f),(%f,%f) Mindist %f\n",he->x1,he->y1,he->x2,he->y2,he->key);
+					latestSonForRectangle=son;
+					son=-1;
+
+				}
+				else
+				{
+					son=he->son1;
+
+				}
+			}
+		}
+		delete he;
+
+		}
+	rectangleNNHeap->copy(heap);
+	delete heap;
+}
+
 //Added by Nusrat
 //Point Group Nearest Neighbor query for numOfQueryPoints
 void RTree::Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints)
@@ -916,16 +1095,21 @@ void RTree::Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints)
 
 		delete he;
 	}
+	kGNNHeap->copy(heap);
 	delete heap;
 }
 //END
 
 //Added by Nusrat
 //Point k Group Nearest Neighbor query for numOfQueryPoints
+//For some reason this algo does not work for k>9
 void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryPoints)
 {
 
 	int indexOfGNNRetrieved=0;
+	kGNNHeap=new Heap();
+	kGNNHeap->init(dimension);
+	latestSon=0;
 	//init a heap that stores the non-leaf entries to be accessed-
 	Heap *heap = new Heap();
 	heap->init(dimension);
@@ -980,7 +1164,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 			if (!heap->remove(he))  //heap is empty
 				{
 					son = -1;
-					//again=false;
+
 				}
 			else
 			{
@@ -988,14 +1172,14 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				{
 					_rslt[indexOfGNNRetrieved][0] = he->x1;
 					_rslt[indexOfGNNRetrieved][1] = he->y1;
-					//printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
-					if(indexOfGNNRetrieved==k-1)
-					{
-						son=-1;
+					//printf("\n%d , Point %f,%f Mindist %f\n",indexOfGNNRetrieved+1,he->x1,he->y1,he->key);
+					if(indexOfGNNRetrieved==k-1){
+						latestSon=son;
+						son=-1;	
 						break;
 					}
-					indexOfGNNRetrieved++;
 					again=true;
+					indexOfGNNRetrieved++;
 
 				}
 				else
@@ -1006,27 +1190,27 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 			}
 		}
 
-		
-		//Storing the current state of this heap so that i can retrieve kth GNN directly next time
-		kGNNHeap = heap;
-		kGNNHeapEntry= he;
-		latestSon=son;
-
-		//delete he;
+		delete he;
 	}
-	//delete heap;
+	
+			//Storing the current state of this heap so that i can retrieve kth GNN directly next time
+		kGNNHeap->copy(heap);
+		delete heap;
 }
 //END
 
-void RTree::retrieve_kth_BFN_GNNQ( double *_rslt){
+
+void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoints){
 		Heap *heap = new Heap();
-		heap =kGNNHeap;
+		heap->init(dimension);
+		heap->copy(kGNNHeap);
+		int son = latestSon; //this entry is to be visited next
+
+		//If the heap already have some leaf nodes
 		//get next entry from the heap----------------------------
 		HeapEntry *he = new HeapEntry();
-		he =kGNNHeapEntry;
+
 		bool again = true;
-		int son = latestSon;
-		io_access++;
 		while (again)
 		{
 			again = false;
@@ -1038,7 +1222,8 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt){
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
-					//printf("\nPoint %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					latestSon=son;
 					son=-1;
 
 				}
@@ -1049,15 +1234,76 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt){
 				}
 			}
 		}
+		delete he;
+		//Heap doesn't have  leaf nodes so need to reinsert
+		while (son != -1)
+		{
+			RTNode *rtn = new RTNode(this, son);
+			io_access++;
+			for (int i = 0; i < rtn -> num_entries; i ++)
+			{
+				float o1[2];
+				float gnnMinDist=0;
+				//Find min Group distance
 
-		
-		//Storing the current state of this heap so that i can retrieve kth GNN directly next time
-		kGNNHeap =heap;
-		kGNNHeapEntry= he;
-		latestSon=son;
+				for(int j=0;j<numOfQueryPoints;j++){
+					o1[0] = (float) o[j][0];
+					o1[1] = (float) o[j][1];
 
+					float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
+					gnnMinDist+=edist;
+					//printf("%f,%f has mindist %f\n",o1[0],o1[1],edist);
+				}
 
+				HeapEntry *he = new HeapEntry();
+				he -> key = gnnMinDist;
+				he -> level = rtn -> level;
+				he -> son1 = rtn->entries[i].son;
+				he-> x1 = rtn->entries[i].bounces[0];
+				//he-> x2 = rtn->entries[i].bounces[1];
+				he-> y1 = rtn->entries[i].bounces[2];
+				//he-> y2 = rtn->entries[i].bounces[3];
+				heap -> insert(he);
+				delete he;
+
+			}
+
+			delete rtn;
+
+			//get next entry from the heap----------------------------
+		HeapEntry *he = new HeapEntry();
+
+		bool again = true;
+		while (again)
+		{
+			again = false;
+			if (!heap->remove(he))  //heap is empty
+				son = -1;
+			else
+			{
+				if (he->level == 0) //p is an object
+				{
+					_rslt[0] = he->x1;
+					_rslt[1] = he->y1;
+					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
+					latestSon=son;
+					son=-1;
+
+				}
+				else
+				{
+					son=he->son1;
+
+				}
+			}
+		}
+		delete he;
+
+		}
+	kGNNHeap->copy(heap);
+	delete heap;
 }
+
 
 // The following code was copied from the implementation of TP-kNN queries from Tony
 void RTree::TPNN_TP(float *_qline, int _k, Entry *_nn, Entry *_rslt, float _max_trvl)

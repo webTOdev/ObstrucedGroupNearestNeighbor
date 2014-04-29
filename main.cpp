@@ -1852,7 +1852,10 @@ void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeig
 	sum_e->io_access += rt->io_access+rt_obs->io_access;
 //	sum_e->page_faults += cache->page_faults - last_pf;
 
+
 	print_output("result_sum.txt",sum_e);
+	delete ognn;
+	delete sum_e;
 }
 //----------------------------------- main -----------------------------------
 int main(int argc, char* argv[]) {
@@ -1886,18 +1889,21 @@ int main(int argc, char* argv[]) {
 
 
 	float m[2];
-	//m[0]=444966 ;
-	//m[1]=444983;
-	m[0]=50 ;
-	m[1]=50;
+	m[0]=415171 ;
+	m[1]=4543907;
 
-	double nearestNeighbor[2];
+	double nearestNeighbor[4];
 
 	//srt->print_tree();
 	//Nearest Neighbor query
-	//srt->Point_BFN_NNQ(m, nearestNeighbor);
-	//printf("Nearest Neighbor of %f,%f is %f,%f\n", m[0], m[1],
-	//		nearestNeighbor[0], nearestNeighbor[1]);
+	srt_obs->Rectangle_BFN_NNQ(m, nearestNeighbor);
+	printf("Nearest Neighbor of (%f,%f), is (%f,%f),(%f,%f)\n", m[0], m[1],
+			nearestNeighbor[0], nearestNeighbor[2],nearestNeighbor[1], nearestNeighbor[3]);
+	for(int i=0;i<70;i++){
+	srt_obs->retrieve_kth_BFN_Rectangle_NNQ(nearestNeighbor,m);
+	printf("kth NN is (%f,%f),(%f,%f)\n",
+			nearestNeighbor[0], nearestNeighbor[2],nearestNeighbor[1], nearestNeighbor[3]);
+		}
 
 
 //	range_test(rt);
@@ -1910,21 +1916,21 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][0] = 8;
 	queryPoints[2][1] = 8;
 
-	//rt->Point_BFN_GNNQ(queryPoints,nearestNeighbor,3);
-/*	printf("Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", queryPoints[0][0],queryPoints[0][1],
+	/*srt->Point_BFN_GNNQ(queryPoints,nearestNeighbor,3);
+	printf("Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
 			nearestNeighbor[0], nearestNeighbor[1]);
-*/
+
 	int k=3;
-	double kNearestNeighbor[3][2];
-//	rt->Point_BFN_kGNNQ(queryPoints,k,kNearestNeighbor,3);
+	double kNearestNeighbor[10][2];
+	rt->Point_BFN_kGNNQ(queryPoints,k,kNearestNeighbor,3);
 	for(int i=0;i<k;i++){
-/*	printf("%d-Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", k,queryPoints[0][0],queryPoints[0][1],
+	printf("%d-Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", k,queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
 			kNearestNeighbor[i][0], kNearestNeighbor[i][1]);
-*/
-	}
 
+	}
+*/
 	
 
 //	m[0]=30 ;
@@ -1939,11 +1945,26 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][0] = 501774;
 	queryPoints[2][1] = 4581595;
 
+/*	srt->Point_BFN_kGNNQ(queryPoints,10,kNearestNeighbor,3);
+	for(int i=0;i<10;i++){
+		printf("%d-Group Nearest Neighbor of is ------%f,%f------\n", i,
+			kNearestNeighbor[i][0], kNearestNeighbor[i][1]);
+	}
+
+	for(int i=2;i<70;i++){
+	srt->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,3);
+	//srt->print_tree();
+	printf("\n Next %d- Group Nearest Neighbor of (%f,%f)",i,nearestNeighbor[0],nearestNeighbor[1]);
+	}
+
+*/
 	//change k
-	for (int k = 2; k <= 10; k = k + INTERVAL_K) {
+	/*for (int k = 2; k <= 8; k = k + 1) {
+		double kNearestNeighbor[20][2]; //
 		printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
 		exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache);
-	}
+		delete srt->kGNNHeap;
+	}*/
 
 	delete cache;
 	delete srt;
@@ -1953,46 +1974,45 @@ int main(int argc, char* argv[]) {
 	delete cache_obs;
 	delete srt_obs;
 
-/*	float r1[4];
+	float r1[4];
 	float r2[4];
-	r1[0]=0;
-	r1[1]=10;
-	r1[2]=0;
-	r1[3]=10;
 
-	
-	r2[0]=30;
-	r2[1]=50;
-	r2[2]=0;
-	r2[3]=20;
-
-	cout<<"Intersect? "<<intersects(r1,r2)<<endl;
-	 FILE *input1,*input2;
-	  input1 = fopen( "Datasets/Greece/roads_1/roads.txt", "r");
+	 FILE *input1,*input2,*input3;
+	  input1 = fopen( "Datasets/Greece/sample_mbr_rest.txt", "r");
+	  input3 = fopen( "Datasets/Greece/mbr_intersect_rest.txt", "a");
 	
 
 	 if (input1 == NULL)
 	 {
 	 printf("Error reading rectdata\n");
 	 }
-		int x,y;
-	 for(int i=0; i<100; i++)
+	 int x,y;
+	 for(int i=9971; i<23268; i++)
 	 {
-		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[2],&r1[1],&r1[3]);
+		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
 		//printf("i %f,%f,%f,%f\n",r1[0],r1[1],r1[2],r1[3]);
-		input2 = fopen( "Datasets/Greece/roads_1/roads.txt", "r");
-		for(int j=0; j<100; j++)
+		input2 = fopen( "Datasets/Greece/sample_mbr.txt", "r");
+		for(int j=0; j<23268; j++)
 		{
 			
-			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[2],&r2[1],&r2[3]);
+			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[1],&r2[2],&r2[3]);
 			//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
-			cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
+			//cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
+			if(intersects(r1,r2))
+				{
+				if(!(r1[0]==r2[0] && r1[2]==r2[2] && r1[1]==r2[1] && r1[3]==r1[3])){
+					fprintf(input3,"%d\t%d\t\t%f\t%f\t%f\t%f%s%d%s%f\t%f\t%f\t%f\n",x,y,r1[0],r1[2],r1[1],r1[3]," Intersects ",intersects(r1,r2),"  ",r2[0],r2[2],r2[1],r2[3]);
+					}
+				}
+			
 			
 		}
 		fclose(input2);
 
 		
 	}
+	 fclose(input1);
+	 fclose(input3);
 
 	
 
