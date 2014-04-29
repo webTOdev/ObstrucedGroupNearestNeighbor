@@ -258,14 +258,14 @@ double VisibilityGraph::findShortestPath(double sourceX, double sourceY,
 	Point* goal;
 	double shortestDistance=initiateDijkstra(numOfPoints, numOfEdges, false, sourcePointId,
 			destPointId,maxVertexNum);
-	int *shortestPath = getShortestPath();
+	vector<int> shortestPath = getShortestPath();
 	int i = 0;
 	//Print the Shortest Path
 	//printf("The Shortest Path is :");
-	while (shortestPath[i] != -1) {
-		//printf("%d ", shortestPath[i]);
+	/*while (i<shortestPath.size()) {
+		printf("%d ", shortestPath[i]);
 		i++;
-	}
+	}*/
 
 	return shortestDistance;
 

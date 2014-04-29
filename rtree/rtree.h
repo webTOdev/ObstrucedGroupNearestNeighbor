@@ -117,17 +117,19 @@ public:
 	//Added by Nusrat for kGNN Euclidean
 	void Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints);
 	void Point_BFN_kGNNQ(Point2D o[],int k,double _rslt[][2],int numOfQueryPoints);
-	void retrieve_kth_BFN_GNNQ( double *_rslt);
+	//void retrieve_kth_BFN_GNNQ( double *_rslt,Point2D o[],int numOfQueryPoints);
+	void retrieve_kth_BFN_GNNQ( double *_rslt,Point2D o[],int numOfQueryPoints);
 
 	int io_access;
-
-private:
-		//These two entries to store the current state of the heap
+			//These two entries to store the current state of the heap for incrementally retrieving point nn
 	Heap *kGNNHeap;
 	int latestSon ;
-    HeapEntry *kGNNHeapEntry;
-	
 
+	//These two entries to store the current state of the heap for incrementally retrieving Rectangle nn
+	Heap *rectangleNNHeap;
+	int latestSonForRectangle ;
+	void Rectangle_BFN_NNQ(Point2D o, double *_rslt);
+	void retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o);
 };
 
 #endif // __RTREE

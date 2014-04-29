@@ -158,6 +158,7 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][2], RTree* rt_obstacle,
 		RTree* rt_dataPoints) {
 
+	printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");
 	double nearestNeighbor[2];
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,
@@ -175,7 +176,7 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 
 	//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,egnn_sorted;
-	
+	printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
 	float *kNN_point,*q;
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	for(int i=0;i<k;i++){
@@ -235,13 +236,13 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		//Find next Group Nearest Neighbour
 		i++;
 		kNN_point = new float[2];
-		rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor);
+		rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints);
 		kNN_point[0]=nearestNeighbor[0];
 		kNN_point[1]=nearestNeighbor[1];
 		std::vector < MyStruct > queryPoints_sorted;
 		//Compute  the aggregate euclidean distance of p and Q
 		double aggregateEuclideanDist = computeEuclideanGroupDistance(kNN_point,queryPoints_sorted,numOfQueryPoints,queryPoints);
-		//printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", aggregateEuclideanDist,kNN_point[0],kNN_point[1]);
+		printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", aggregateEuclideanDist,kNN_point[0],kNN_point[1]);
 		if(aggregateEuclideanDist>maxObsDistance){
 			printf("\n-----------------------Breaking from while loop!!-----------------------\n");
 			printf("\nAggregate Euclidean Distance %lf of data point p(%f,%f) is Greater than Max obstructed distance %lf\n",aggregateEuclideanDist,kNN_point[0],kNN_point[1], maxObsDistance);
@@ -267,6 +268,19 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		}
 		//Now remove the Data point from Vis graph as obstructed group distance calculation is finished
 		removeDataPointFromVG(initialVisGraph,kNN_point);
+	}
+
+	//Sort the Euclidean GNN
+	std::sort(egnn_sorted.begin(), egnn_sorted.end(), less_than_key());
+
+	printf("\nFinal K-Euclidean Group Nearest Neighbor\n");
+		for(int index=0;index<egnn_sorted.size();index++){
+		//printf("\n(%f,%f) has distance %f\n",queryPoints_sorted[j].queryPoints[0],queryPoints_sorted[j].queryPoints[1],queryPoints_sorted[j].distance);
+			q = new float[2];
+			q[0]=egnn_sorted[index].queryPoints[0];
+			q[1]=egnn_sorted[index].queryPoints[1];
+
+			printf("k=%d, (%f,%f) distance %lf \n",index,q[0], q[1],egnn_sorted[index].distance);
 	}
 
 	//Sort the Obstructed GNN

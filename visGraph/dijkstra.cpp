@@ -7,7 +7,7 @@
 
 #include <cstdlib>
 #include<cstdio>
-#include<vector>
+
 #include<set>
 #include "dijkstra.h"
 #include <cmath>
@@ -20,8 +20,8 @@ int verticesNum;
 int edgesNum;
 vector< vector< pair<int, double> > > comparisionMatrix;
 vector<double> pathWeight;
+vector<int> smallestPath;
 int *prev;
-int *smallestPath;
 
 void printPath(int dest);
 
@@ -49,14 +49,14 @@ void prim_dijkstra(int s) //s starting point
     pathWeight[s] = 0;
 
 	prev = new int[MAX_NUM_VERTEX];
-	smallestPath=new int[MAX_NUM_VERTEX];
+	smallestPath.clear();
 
 
     kopiec.clear();
     for (int i = 0; i < MAX_NUM_VERTEX; i++) { //throw vertices, k to the mound
         kopiec.insert(i);
         prev[i]=-1;
-        smallestPath[i]=-1;
+      //  smallestPath[i]=-1;
     }
 
     while (!kopiec.empty()) //go to the mound effect
@@ -111,6 +111,7 @@ double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int
     printPath(g);
     printf("\n");
 	fclose(input);
+
     return pathWeight[g];
 }
 
@@ -124,11 +125,13 @@ void printPath(int dest) {
 	static int index=0;
 	if (prev[dest] != -1)
 		printPath(prev[dest]);
-	//printf("%d ", dest);
-	smallestPath[index]=dest;
+	//printf("\n%d ", dest);
+//	smallestPath[index]=dest;
+	smallestPath.push_back(dest);
 	index++;
 }
-int * getShortestPath(){
+std::vector<int> getShortestPath(){
+
 	return smallestPath;
 }
 

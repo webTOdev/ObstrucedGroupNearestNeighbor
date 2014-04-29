@@ -197,3 +197,14 @@ void Heap::init(int _dim, int _hsize)
 	used = 0;
 	maxused=0;
 }
+
+void Heap::copy(Heap* h){
+	for (int i = 0; i < h->used; i ++)
+	{
+		cont[i].copy(&h->cont[i]);
+		}
+	hsize=h->hsize;
+	used=h->used;
+	maxused=h->maxused;
+	
+}
