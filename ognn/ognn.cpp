@@ -236,7 +236,7 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 		//Find next Group Nearest Neighbour
 		i++;
 		kNN_point = new float[2];
-		rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor);
+		rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints);
 		kNN_point[0]=nearestNeighbor[0];
 		kNN_point[1]=nearestNeighbor[1];
 		std::vector < MyStruct > queryPoints_sorted;

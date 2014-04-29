@@ -1959,12 +1959,12 @@ int main(int argc, char* argv[]) {
 
 */
 	//change k
-	/*for (int k = 2; k <= 8; k = k + 1) {
+	for (int k = 2; k <= 2; k = k + 1) {
 		double kNearestNeighbor[20][2]; //
 		printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
 		exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache);
 		delete srt->kGNNHeap;
-	}*/
+	}
 
 	delete cache;
 	delete srt;
