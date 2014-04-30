@@ -423,12 +423,24 @@ bool doesLineAndPolygonIntersects(tLinestring ls,tPolygon p,Point* w_i,Point* or
     }
 
     //If the two points is in the same obstacle then they cannot see each other
+       //If the two points is in the same obstacle then they cannot see each other
     if(turns.size()==1){
-		int obsOri=getObsCoveringPoint(ori,obsList)->id;
-		int obsW_i=getObsCoveringPoint(w_i,obsList)->id;
-		if(obsOri==obsW_i)
-			intersect=true;
-    }
+    		Obstacle* obsOri=getObsCoveringPoint(ori,obsList);
+    		Obstacle* obsW_i=getObsCoveringPoint(w_i,obsList);
+    		if(obsOri->id==obsW_i->id){
+    			vector<Line*> obsSides = obsOri->getEdges();
+    			for(int i=0;i<obsSides.size();i++){
+    				//If not an obstacle edge than intersecting edge
+    				if(((obsSides[i]->a->id == ori->id && obsSides[i]->b->id == w_i->id) ||
+    						(obsSides[i]->b->id == ori->id && obsSides[i]->a->id == w_i->id))){
+    							return false;
+    				}
+    				else
+    					intersect = true;
+    			}
+
+    		}
+      }
     return intersect;
 
 }
