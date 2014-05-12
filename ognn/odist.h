@@ -17,6 +17,7 @@
 #include "../linlist/linlist.h"
 #include "../ognn_utility.h"
 #include "../rtree/rtree.h"
+#include "../visGraph/pointHandler.h"
 
 const int infinity = 1000000000; 
 
@@ -25,9 +26,10 @@ const int infinity = 1000000000;
 class ObstructedDistance
 {
 public:
+	//function=0 sum , function=1 max
 	double computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
 		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,
-		vector<string> obstacleString);
+		vector<string> obstacleString,int function);
 	bool doesLineAndObstcaleIntersects(tLinestring ls,tPolygon p);
 
 	//LineString creation 
@@ -38,10 +40,12 @@ public:
 	void writePointAndQueryPointsInFile(float* p,Point2D queryPoints[],int numOfQueryPoints);
 	void writePointInFile(float* p);
 	void constructInitialVisGraph(VisibilityGraph* initialVisGraph);
-	double computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p, float* q,vector<int> shortestPath);
+	double computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p, float* q,vector<int>& shortestPath);
 	int drawAndWriteFileVisEdges(vector<Line*> visEdges);
 	void replaceObsDist(std::vector < MyStruct >& dist_O_p_qi,float* q,double obsDist);
-
+	bool checkIntersectionWithSP(float* q,vector< MyShortestPath>& shortestPath_p_qi,double obs[5],
+		VisibilityGraph* initialVisGraph);
+	void addOrReplaceSP(float* q,vector< MyShortestPath>& shortestPath_p_qi,vector<int>& shortestPath);
 
 };
 
