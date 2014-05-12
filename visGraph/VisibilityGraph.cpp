@@ -247,7 +247,7 @@ void  VisibilityGraph::insertEdgeInVisGraph(vector<Line*> lines){
 }
 
 double VisibilityGraph::findShortestPath(double sourceX, double sourceY,
-		double destX, double destY,int maxVertexNum) {
+		double destX, double destY,int maxVertexNum,vector<int>& shortestPath ) {
 	int numOfPoints = nodes.size();
 	int numOfEdges = edges.size();
 	int sourcePointId = searchPointByCoord(nodes, sourceX, sourceY)->id;
@@ -258,7 +258,7 @@ double VisibilityGraph::findShortestPath(double sourceX, double sourceY,
 	Point* goal;
 	double shortestDistance=initiateDijkstra(numOfPoints, numOfEdges, false, sourcePointId,
 			destPointId,maxVertexNum);
-	vector<int> shortestPath = getShortestPath();
+	shortestPath = getShortestPath();
 	int i = 0;
 	//Print the Shortest Path
 	//printf("The Shortest Path is :");
