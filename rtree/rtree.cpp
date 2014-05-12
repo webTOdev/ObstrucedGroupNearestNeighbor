@@ -902,6 +902,7 @@ void RTree::Rectangle_BFN_NNQ(Point2D o, double *_rslt)
 					_rslt[2] = he->y1;
 					_rslt[3] = he->y2;
 					//printf("Rectangle (%f,%f),(%f,%f) Mindist %f\n",he->x1,he->y1,he->x2,he->y2,he->key);
+					_rslt[4] = he->key; 
 					latestSonForRectangle=son;
 					son=-1;
 														
@@ -945,6 +946,7 @@ void RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 					_rslt[2] = he->y1;
 					_rslt[3] = he->y2;
 					//printf("Rectangle (%f,%f),(%f,%f) Mindist %f\n",he->x1,he->y1,he->x2,he->y2,he->key);
+					_rslt[4] = he->key; 
 					latestSonForRectangle=son;
 					son=-1;
 
@@ -1004,6 +1006,7 @@ void RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 					_rslt[3] = he->y2;
 					//printf("Rectangle (%f,%f),(%f,%f) Mindist %f\n",he->x1,he->y1,he->x2,he->y2,he->key);
 					latestSonForRectangle=son;
+					_rslt[4] = he->key; 
 					son=-1;
 
 				}

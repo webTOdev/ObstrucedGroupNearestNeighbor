@@ -386,6 +386,8 @@ float MINDIST(float *p, float *bounces, int dim)
     float r;
     int i;
 
+	/*printf("bounces[0] %lf,bounces[1] %lf,bounces[2] %lf,bounces[3] %lf,p[0] %lf,p[1] %lf",
+		bounces[0],bounces[1],bounces[2],bounces[3],p[0],p[1]);*/
     //if the point is at the left of rectangle min = dist(p_x,rect_x1) else min = dist(p_x,rect_x2) and same for y
     for(i = 0; i < dim; i++)
     {
@@ -401,7 +403,7 @@ float MINDIST(float *p, float *bounces, int dim)
 
 		summe += pow(p[i]-r,2); //dist = x^2+y^2
     }
-    return(summe);
+    return(sqrt(summe));
     
 }
 
