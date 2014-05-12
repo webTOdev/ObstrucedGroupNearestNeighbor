@@ -35,4 +35,11 @@ struct less_than_key
     }
 };
 
+struct MyShortestPath
+{
+    vector<int> shortestPath;
+    float* queryPoints;
+
+	MyShortestPath(vector<int> sp , float* q) { shortestPath = sp; queryPoints =  q ;}
+};
 #endif /* OGNN_UTILITY_H_ */

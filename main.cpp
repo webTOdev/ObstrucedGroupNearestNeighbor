@@ -25,6 +25,7 @@
 #include "./rtree/distance.h"
 #include "./his/histogram.h"
 #include "ognn/ognn.h"
+#include "ognn/odist.h"
 
 //Added by Tanzima
 //#include "global.h"
@@ -1872,43 +1873,56 @@ int main(int argc, char* argv[]) {
 	//createDataPointFile();
 	//createMBRFile();
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	//RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
+	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
 	//rt->print_tree();
 	//delete rt;
 
 	Cache *cache_obs = new Cache(0,blocksize);
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	//RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
+	RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
 	//rt_obs->print_tree();
 	//range_test(rt_obs);
 	//delete rt_obs;
 
-	RTree *srt = new RTree(TREEFILE,  cache);
-	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
-	//srt_obs->print_tree();
+	//RTree *srt = new RTree(TREEFILE,  cache);
+	//RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	//rt_obs->print_tree();
 
 
 	float m[2];
-	m[0]=415171 ;
-	m[1]=4543907;
+	/*m[0]=415171 ;
+	m[1]=4543907;*/
 
-	double nearestNeighbor[4];
+	m[0]=2;
+	m[1]=2;
+
+	double nearestNeighbor[5];
+
+	
 
 	//srt->print_tree();
 	//Nearest Neighbor query
-	srt_obs->Rectangle_BFN_NNQ(m, nearestNeighbor);
+	/*srt_obs->Rectangle_BFN_NNQ(m, nearestNeighbor);
 	printf("Nearest Neighbor of (%f,%f), is (%f,%f),(%f,%f)\n", m[0], m[1],
 			nearestNeighbor[0], nearestNeighbor[2],nearestNeighbor[1], nearestNeighbor[3]);
-	for(int i=0;i<70;i++){
+	for(int i=0;i<2;i++){
 	srt_obs->retrieve_kth_BFN_Rectangle_NNQ(nearestNeighbor,m);
 	printf("kth NN is (%f,%f),(%f,%f)\n",
 			nearestNeighbor[0], nearestNeighbor[2],nearestNeighbor[1], nearestNeighbor[3]);
 		}
-
+*/
 
 //	range_test(rt);
 
+	int group_size=3;
 	float queryPoints[3][2];
+	/*queryPoints[0][0] = 506364;
+	queryPoints[0][1] = 4583290;
+	queryPoints[1][0] = 501098;
+	queryPoints[1][1] = 4582444;
+	queryPoints[2][0] = 501774;
+	queryPoints[2][1] = 4581595;*/
+
 	queryPoints[0][0] = 10;
 	queryPoints[0][1] = 10;
 	queryPoints[1][0] = 11;
@@ -1916,34 +1930,11 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][0] = 8;
 	queryPoints[2][1] = 8;
 
-	/*srt->Point_BFN_GNNQ(queryPoints,nearestNeighbor,3);
-	printf("Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", queryPoints[0][0],queryPoints[0][1],
-			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
-			nearestNeighbor[0], nearestNeighbor[1]);
 
-	int k=3;
-	double kNearestNeighbor[10][2];
-	rt->Point_BFN_kGNNQ(queryPoints,k,kNearestNeighbor,3);
-	for(int i=0;i<k;i++){
-	printf("%d-Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is %f,%f\n", k,queryPoints[0][0],queryPoints[0][1],
-			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1],
-			kNearestNeighbor[i][0], kNearestNeighbor[i][1]);
-
-	}
-*/
-	
-
-//	m[0]=30 ;
-	//	m[1]=60;
-	//ognn->onnMultiPointApproach(m,kNearestNeighbor,rt_obs,rt);
-
-	int group_size=3;
-	queryPoints[0][0] = 506364;
-	queryPoints[0][1] = 4583290;
-	queryPoints[1][0] = 501098;
-	queryPoints[1][1] = 4582444;
-	queryPoints[2][0] = 501774;
-	queryPoints[2][1] = 4581595;
+	vector<string> obstacleString;
+	ObstructedDistance* oDist = new ObstructedDistance();
+	oDist->computeAggObstructedDistance(new VisibilityGraph(),
+		m,queryPoints,3,rt_obs,obstacleString);
 
 /*	srt->Point_BFN_kGNNQ(queryPoints,10,kNearestNeighbor,3);
 	for(int i=0;i<10;i++){
@@ -1959,27 +1950,29 @@ int main(int argc, char* argv[]) {
 
 */
 	//change k
-	for (int k = 2; k <= 2; k = k + 1) {
+/*	for (int k = 2; k <= 3; k = k + 1) {
 		double kNearestNeighbor[20][2]; //
 		printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
 		exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache);
 		delete srt->kGNNHeap;
 	}
-
+*/
 	delete cache;
-	delete srt;
+	//delete srt;
+	delete rt;
 
 
 
 	delete cache_obs;
-	delete srt_obs;
+	//delete srt_obs;
+	delete rt_obs;
 
 	float r1[4];
 	float r2[4];
 
 	 FILE *input1,*input2,*input3;
-	  input1 = fopen( "Datasets/Greece/sample_mbr_rest.txt", "r");
-	  input3 = fopen( "Datasets/Greece/mbr_intersect_rest.txt", "a");
+	  input1 = fopen( "Datasets/Greece/sample_mbr.txt", "r");
+	  input3 = fopen( "Datasets/Greece/rect_point_intersect.txt", "a");
 	
 
 	 if (input1 == NULL)
@@ -1987,12 +1980,12 @@ int main(int argc, char* argv[]) {
 	 printf("Error reading rectdata\n");
 	 }
 	 int x,y;
-	 for(int i=9971; i<23268; i++)
+	 for(int i=1198; i<23268; i++)
 	 {
 		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
 		//printf("i %f,%f,%f,%f\n",r1[0],r1[1],r1[2],r1[3]);
-		input2 = fopen( "Datasets/Greece/sample_mbr.txt", "r");
-		for(int j=0; j<23268; j++)
+		input2 = fopen( "Datasets/Greece/sample.txt", "r");
+		for(int j=0; j<98600; j++)
 		{
 			
 			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[1],&r2[2],&r2[3]);

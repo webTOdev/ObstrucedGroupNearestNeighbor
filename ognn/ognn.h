@@ -32,6 +32,7 @@ public:
 												VisibilityGraph* initialVisGraph  );
 	double computeObsDistanceForOtherQueryPoints(float* kNN_point,std::vector < MyStruct >& queryPoints_sorted,VisibilityGraph* initialVisGraph,
 												   double oldAggregateObstructedDistance,int numOfQueryPoints,RTree* rt_obstacle);
+	void writePolygonInFile(SortedLinList *res_list);
 };
 
 
