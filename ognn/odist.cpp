@@ -234,10 +234,15 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 
 	while(! l_Q.empty());
 	dist_OG=0.0;
-	if(function==0)
+	if(function==0){
 		for(int i=0;i<numOfQueryPoints;i++){
 			dist_OG+=dist_O_p_qi[i].distance;
 		}
+	}
+	if(function==1){
+		std::sort(dist_O_p_qi.begin(), dist_O_p_qi.end(), more_than_key());
+		dist_OG=dist_O_p_qi[0].distance;
+	}
 
 	delete q;
 	delete extraObs;
