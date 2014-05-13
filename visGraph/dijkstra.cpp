@@ -95,7 +95,7 @@ double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int
 	MAX_NUM_VERTEX=maxVertexNum;
     //printf("Vertice Num %d , Edge Num %d\n",verticesNum,edgesNum);
     comparisionMatrix.resize(MAX_NUM_VERTEX); // first edge ™ will turn
-	double **temp=new double*[MAX_NUM_VERTEX];
+	/*double **temp=new double*[MAX_NUM_VERTEX];
 	for (int i = 0; i < MAX_NUM_VERTEX; i++)
 		temp[i] = new double[MAX_NUM_VERTEX];
 	
@@ -114,14 +114,14 @@ double initiateDijkstra(int numVertice,int numEdges,bool directed,int source,int
 				 comparisionMatrix[i].push_back(make_pair(j, temp[i][j])); // directed not addressed
 			}
 		}
-	}
+	}*/
 
- /*   for (int i = 0; i < edgesNum; i++) {
+    for (int i = 0; i < edgesNum; i++) {
         fscanf(input, "%d %d %lf", &a, &b, &c); // c = Cost edge from a to b
         comparisionMatrix[a].push_back(make_pair(b, c)); // directed not addressed
         if(!directed)
         comparisionMatrix[b].push_back(make_pair(a, c)); //
-    }*/
+    }
 
     s=source;
     g=destination;
@@ -151,7 +151,7 @@ void printPath(int dest) {
 	if (prev[dest] != -1){
 		printPath(prev[dest]);
 		}
-	printf("\n%d ", dest);
+	//printf("\n%d ", dest);
 //	smallestPath[index]=dest;
 	smallestPath.push_back(dest);
 	index++;
