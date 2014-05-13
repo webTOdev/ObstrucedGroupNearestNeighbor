@@ -172,7 +172,7 @@ double OGNN::computeObsDistanceForTheFarthestQueryPoint(float* kNN_point,std::ve
 }
 
 void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
-		int k, double kNearestNeighbor[][2], RTree* rt_obstacle,
+		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
 		RTree* rt_dataPoints) {
 
 	printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");

@@ -1,6 +1,6 @@
 //Added By Nusrat
-#ifndef OGNN_GNN_H_
-#define OGNN_GNN_H_
+#ifndef OGNNGNN_H_
+#define OGNNGNN_H_
 
 #include "../func/gendef.h"
 #include "../heap/heap.h"
@@ -18,11 +18,9 @@ using namespace std;
 class OGNN_GNN
 {
 public:
-	void ognnMultiPointApproach(Point2D queryPoints[],int numOfQueryPoints,int k,double kNearestNeighbor[][2],RTree* rt_obstacle,RTree* rt_dataPoints);
-	
-	void constructInitialVisGraph(VisibilityGraph* initialVisGraph);
+	void ognnUsingEGNN(Point2D queryPoints[],int numOfQueryPoints,int k,double kNearestNeighbor[][3],RTree* rt_obstacle,RTree* rt_dataPoints,int function);
 	
 };
 
 
-#endif /* OGNN_GNN_H_ */
+#endif /* OGNNGNN_H_ */

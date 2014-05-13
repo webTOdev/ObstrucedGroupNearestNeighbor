@@ -26,6 +26,7 @@
 #include "./his/histogram.h"
 #include "ognn/ognn.h"
 #include "ognn/odist.h"
+#include "ognn/ognngnn.h"
 
 //Added by Tanzima
 //#include "global.h"
@@ -1836,7 +1837,7 @@ void print_output(char *s1, Exp_stat *e) {
 	fclose(outputFile1);
 }
 
-void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][2],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache){
+void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][3],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache){
 	Stopwatch sw1;
 	Exp_stat *sum_e=new Exp_stat();
 	sum_e->k=k;
@@ -1931,9 +1932,13 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][1] = 8;
 
 
-	ObstructedDistance* oDist = new ObstructedDistance();
-	oDist->computeAggObstructedDistance(new VisibilityGraph(),
-		m,queryPoints,3,rt_obs,0);
+	/*ObstructedDistance* oDist = new ObstructedDistance();
+	oDist->computeAggObstructedDistance(new VisibilityGraph(),m,queryPoints,3,rt_obs,0);*/
+	double kNearestNeighbor[20][3]; //
+	OGNN_GNN *ognn_gnn = new OGNN_GNN();
+	ognn_gnn->ognnUsingEGNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,0);
+	//delete srt->kGNNHeap;
+
 
 /*	srt->Point_BFN_kGNNQ(queryPoints,10,kNearestNeighbor,3);
 	for(int i=0;i<10;i++){

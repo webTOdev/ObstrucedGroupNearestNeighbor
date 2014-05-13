@@ -18,7 +18,7 @@ using namespace std;
 class OGNN
 {
 public:
-	void ognnMultiPointApproach(Point2D queryPoints[],int numOfQueryPoints,int k,double kNearestNeighbor[][2],RTree* rt_obstacle,RTree* rt_dataPoints);
+	void ognnMultiPointApproach(Point2D queryPoints[],int numOfQueryPoints,int k,double kNearestNeighbor[][3],RTree* rt_obstacle,RTree* rt_dataPoints);
 	
 
 	double computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p,float* q,RTree* rt_obstacle,vector<string> obstacleString);

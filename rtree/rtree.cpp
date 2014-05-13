@@ -1106,7 +1106,7 @@ void RTree::Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints)
 //Added by Nusrat
 //Point k Group Nearest Neighbor query for numOfQueryPoints
 //For some reason this algo does not work for k>9
-void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryPoints)
+void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryPoints)
 {
 
 	int indexOfGNNRetrieved=0;
@@ -1175,6 +1175,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][2],int numOfQueryP
 				{
 					_rslt[indexOfGNNRetrieved][0] = he->x1;
 					_rslt[indexOfGNNRetrieved][1] = he->y1;
+					_rslt[indexOfGNNRetrieved][2] = he->key;
 					//printf("\n%d , Point %f,%f Mindist %f\n",indexOfGNNRetrieved+1,he->x1,he->y1,he->key);
 					if(indexOfGNNRetrieved==k-1){
 						latestSon=son;
@@ -1225,6 +1226,7 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
+					_rslt[2] = he->key;
 					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					latestSon=son;
 					son=-1;
@@ -1288,6 +1290,7 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 				{
 					_rslt[0] = he->x1;
 					_rslt[1] = he->y1;
+					_rslt[2] = he->key;
 					//printf("Point %f,%f Mindist %f\n",he->x1,he->y1,he->key);
 					latestSon=son;
 					son=-1;

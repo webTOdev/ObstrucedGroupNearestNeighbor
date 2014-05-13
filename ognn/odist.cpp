@@ -102,7 +102,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 		//Compute  the aggregate euclidean distance of p and Q
 		double euclideanDist = getDistanceBetweenTwoPoints(p, q);		
 		
-		printf("\n Euclidean Distance between p %lf,%lf is %lf and q %f,%f\n", p[0],p[1],euclideanDist,q[0],q[1]);
+		//printf("\n Euclidean Distance between p %lf,%lf is %lf and q %f,%f\n", p[0],p[1],euclideanDist,q[0],q[1]);
 		dist_O_p_qi.push_back(MyStruct(euclideanDist, q));
 
 		//delete q;
@@ -111,16 +111,12 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	std::sort(dist_O_p_qi.begin(), dist_O_p_qi.end(), more_than_key());
 	bool firstIteration=true;
 	bool pAdded=false;
-	if (remove(VISGRAPH_FILE) != 0)
-		perror("Error deleting file ");
-	//For once
-	writeQueryPointsInFile(queryPoints,numOfQueryPoints);
-	constructInitialVisGraph(initialVisGraph);
+	
 	//Rectangle_BFN_NNQ will be called only once, so handling it from outside
 	double obstacle[5];
 	rt_obstacle->Rectangle_BFN_NNQ(p, obstacle);
-	printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
-			obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);
+	/*printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
+			obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);*/
 	double dmax= dist_O_p_qi[0].distance;
 	if(obstacle[4]<dmax){
 			obsInRange.push_back(obstacle);
@@ -142,8 +138,8 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 					break;
 			}
 			rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,p);
-			printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",
-				nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);
+			/*printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",
+				nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);*/
 			if(nObstacle[4]<dmax){				
 				obsInRange.push_back(nObstacle);
 			}
@@ -160,8 +156,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 
 
 		vector<int> shortestPath;
-		if (remove(VISGRAPH_FILE) != 0)
-		perror("Error deleting file");
+
 		//Clear the query points list
 		l_Q.clear();
 
@@ -226,9 +221,9 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 			addOrReplaceSP(l_Q[j],shortestPath_p_qi,shortestPath);
 		}
 
-		for(int j=0;j<dist_O_p_qi.size();j++){
+	/*	for(int j=0;j<dist_O_p_qi.size();j++){
 			printf("\n(%f,%f) has distance %f\n",dist_O_p_qi[j].queryPoints[0],dist_O_p_qi[j].queryPoints[1],dist_O_p_qi[j].distance);
-		}
+		}*/
 		firstIteration=false;
 		//Sort the obstructed distance as some distance may be updated by now
 		std::sort(dist_O_p_qi.begin(), dist_O_p_qi.end(), more_than_key());
@@ -248,8 +243,13 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 
 	delete q;
 	delete extraObs;
-	//Set the VisGraph in the initial state , next time new p  will be added again
-	removeDataPointFromVG(initialVisGraph,p);
+	//Set the VisGraph in the initial state remove p if added in graph, next time new p  will be added again
+	if(pAdded){
+		removeDataPointFromVG(initialVisGraph,p);
+	}
+	//The rectangle heap from obs Rtree as it will be recreated for the next p
+	delete rt_obstacle->rectangleNNHeap;
+	printf("\n odist %lf",dist_OG);
 	return dist_OG;
 
 }
@@ -381,6 +381,8 @@ void ObstructedDistance::constructInitialVisGraph(VisibilityGraph* initialVisGra
 
 }
 void ObstructedDistance::writePointAndQueryPointsInFile(float* p,Point2D queryPoints[],int numOfQueryPoints){
+	if (remove(VISGRAPH_FILE) != 0)
+		perror("Error deleting file ");
 	writePointInFile(p);
 	writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	
@@ -388,6 +390,8 @@ void ObstructedDistance::writePointAndQueryPointsInFile(float* p,Point2D queryPo
 }
 void ObstructedDistance::writeQueryPointsInFile(Point2D queryPoints[],int numOfQueryPoints){
 
+	if (remove(VISGRAPH_FILE) != 0)
+		perror("Error deleting file ");
 	float *q;
 	for(int i=0;i<numOfQueryPoints;i++){
 		q = new float[2];
