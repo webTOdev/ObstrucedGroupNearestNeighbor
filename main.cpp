@@ -1887,7 +1887,7 @@ int main(int argc, char* argv[]) {
 
 	//RTree *srt = new RTree(TREEFILE,  cache);
 	//RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
-	//rt_obs->print_tree();
+	//srt_obs->print_tree();
 
 
 	float m[2];
@@ -1936,9 +1936,12 @@ int main(int argc, char* argv[]) {
 	oDist->computeAggObstructedDistance(new VisibilityGraph(),m,queryPoints,3,rt_obs,0);*/
 	double kNearestNeighbor[20][3]; //
 	OGNN_GNN *ognn_gnn = new OGNN_GNN();
-	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
+	//ognn_gnn->ognnUsingEGNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,0);
+	//ognn_gnn->ognnSumUsingNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,0);
 
-	ognn_gnn->ognnSumUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
+	ognn_gnn->ognnUsingEGNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,1);
+
+	
 	//delete srt->kGNNHeap;
 
 	/*float q[1][2];
@@ -1969,13 +1972,13 @@ int main(int argc, char* argv[]) {
 */
 	delete cache;
 	//delete srt;
-	delete rt;
+	//delete rt;
 
 
 
 	delete cache_obs;
 	//delete srt_obs;
-	delete rt_obs;
+	//delete rt_obs;
 
 	float r1[4];
 	float r2[4];

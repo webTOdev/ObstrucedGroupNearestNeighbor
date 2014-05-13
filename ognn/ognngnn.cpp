@@ -31,7 +31,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
-	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,numOfQueryPoints);
+	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,numOfQueryPoints,function);
 	
 	printf("\nk- Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is ", queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1]);
@@ -56,17 +56,17 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		kNN_point[0] = kNearestNeighbor[i][0];
 		kNN_point[1] = kNearestNeighbor[i][1];
 		kNN_point[2] = kNearestNeighbor[i][2];
-		printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
+		//printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
 		egnn_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
 		//Compute aggObstructedDistance
 		double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
 		ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
-		printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);	
+		//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);	
 	}
 
 	std::sort(egnn_sorted.begin(), egnn_sorted.end(), more_than_key());
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
-	print(egnn_sorted,ognn_sorted,k);
+	//print(egnn_sorted,ognn_sorted,k);
 	double dkmax_e=egnn_sorted[0].distance;
 	double dkmax_o=ognn_sorted[0].distance;
 
@@ -75,13 +75,13 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		while(1){
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
-			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints);
+			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints,function);
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];
 			kNN_point[2]=nearestNeighbor[2];
 			egnn_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
-			printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
-			printf("\ndkmax = %lf \n",dkmax_o);	
+			//printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
+			//printf("\ndkmax = %lf \n",dkmax_o);	
 			//Euclidean distance is greater so no need to check obs dist
 			if(kNN_point[2]<=dkmax_o){
 				double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
@@ -95,10 +95,15 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		}
 
-		std::sort(egnn_sorted.begin(), egnn_sorted.end(), more_than_key());
-		std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
-		print(egnn_sorted,ognn_sorted,k);
 	}
+	
+	std::sort(egnn_sorted.begin(), egnn_sorted.end(), more_than_key());
+	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
+	if(function==0)
+		printf("********************OGNN-GNN-SUM*******************************\n");
+	if(function==1)
+		printf("********************OGNN-GNN-MAX*******************************\n");
+	print(egnn_sorted,ognn_sorted,k);
 
 
 	delete kNN_point;
@@ -116,7 +121,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
-	rt_dataPoints->Point_BFN_kGNNQ(centroid, k, kNearestNeighbor,1);
+	rt_dataPoints->Point_BFN_kGNNQ(centroid, k, kNearestNeighbor,1,function);
 	
 	printf("\nk- Nearest Neighbor of centroid (%f,%f)is ", centroid[0][0],centroid[0][1]);
 	for(int index=0;index<k;index++){
@@ -150,7 +155,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 	std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), more_than_key());
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
-	print(enn_centroid_sorted,ognn_sorted,k);
+	//print(enn_centroid_sorted,ognn_sorted,k);
 	double dkmax_e=enn_centroid_sorted[0].distance;
 	double dkmax_o=ognn_sorted[0].distance;
 	
@@ -160,7 +165,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
-			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1);
+			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1,function);
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];
 			kNN_point[2]=nearestNeighbor[2];
@@ -178,6 +183,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), more_than_key());
 		std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
+		printf("********************OGNN-CENTROID-NN-SUM*******************************\n");
 		print(enn_centroid_sorted,ognn_sorted,k);
 
 

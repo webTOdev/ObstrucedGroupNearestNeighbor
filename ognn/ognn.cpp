@@ -179,7 +179,7 @@ void OGNN::ognnMultiPointApproach(Point2D queryPoints[], int numOfQueryPoints,
 	double nearestNeighbor[2];
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,
-			numOfQueryPoints);
+			numOfQueryPoints,0);
 	
 	printf("\nk- Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is ", queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1]);

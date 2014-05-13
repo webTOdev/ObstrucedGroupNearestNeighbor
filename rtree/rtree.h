@@ -116,8 +116,8 @@ public:
 
 	//Added by Nusrat for kGNN Euclidean
 	void Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints);
-	void Point_BFN_kGNNQ(Point2D o[],int k,double _rslt[][3],int numOfQueryPoints);
-	void retrieve_kth_BFN_GNNQ( double *_rslt,Point2D o[],int numOfQueryPoints);
+	void Point_BFN_kGNNQ(Point2D o[],int k,double _rslt[][3],int numOfQueryPoints,int function);
+	void retrieve_kth_BFN_GNNQ( double *_rslt,Point2D o[],int numOfQueryPoints,int function);
 
 	int io_access;
 	//These two entries to store the current state of the heap for incrementally retrieving point nn

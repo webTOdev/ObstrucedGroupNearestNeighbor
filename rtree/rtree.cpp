@@ -1104,9 +1104,9 @@ void RTree::Point_BFN_GNNQ(Point2D o[], double *_rslt,int numOfQueryPoints)
 //END
 
 //Added by Nusrat
-//Point k Group Nearest Neighbor query for numOfQueryPoints
-//For some reason this algo does not work for k>9
-void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryPoints)
+//Point k Group Nearest Neighbor query for numOfQueryPoints sum
+//function=0 sum, function=1 max
+void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryPoints,int function)
 {
 
 	int indexOfGNNRetrieved=0;
@@ -1134,7 +1134,14 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryP
 				o1[1] = (float) o[j][1];
 
 				float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
-				gnnMinDist+=edist;
+				if(function==0){//Aggregate function sum
+					gnnMinDist+=edist;
+				}else
+					if(function==1){
+						if(edist>gnnMinDist){
+							gnnMinDist=edist;
+						}
+					}
 				//printf("%f,%f has mindist %f\n",o1[0],o1[1],edist);
 				
 			}
@@ -1203,8 +1210,8 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryP
 }
 //END
 
-
-void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoints){
+//function=0 sum, function=1 max
+void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoints,int function){
 		Heap *heap = new Heap();
 		heap->init(dimension);
 		heap->copy(kGNNHeap);
@@ -1256,7 +1263,14 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 					o1[1] = (float) o[j][1];
 
 					float edist = MINDIST(o1, rtn->entries[i].bounces, dimension);
-					gnnMinDist+=edist;
+					if(function==0){//Aggregate function sum
+						gnnMinDist+=edist;
+					}else
+						if(function==1){
+							if(edist>gnnMinDist){
+								gnnMinDist=edist;
+							}
+					}
 					//printf("%f,%f has mindist %f\n",o1[0],o1[1],edist);
 				}
 
