@@ -1877,6 +1877,8 @@ int main(int argc, char* argv[]) {
 	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
 	//rt->print_tree();
 	//delete rt;
+	//RTree *srt = new RTree(TREEFILE,  cache);
+	//srt->print_tree();
 
 	Cache *cache_obs = new Cache(0,blocksize);
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
@@ -1936,10 +1938,12 @@ int main(int argc, char* argv[]) {
 	oDist->computeAggObstructedDistance(new VisibilityGraph(),m,queryPoints,3,rt_obs,0);*/
 	double kNearestNeighbor[20][3]; //
 	OGNN_GNN *ognn_gnn = new OGNN_GNN();
-	//ognn_gnn->ognnUsingEGNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,0);
-	//ognn_gnn->ognnSumUsingNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,0);
+	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
+	ognn_gnn->ognnSumUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
+	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1);
+	ognn_gnn->ognnMaxUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1);
 
-	ognn_gnn->ognnUsingEGNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,1);
+	
 
 	
 	//delete srt->kGNNHeap;
@@ -1980,50 +1984,14 @@ int main(int argc, char* argv[]) {
 	//delete srt_obs;
 	//delete rt_obs;
 
-	float r1[4];
-	float r2[4];
 
-	 FILE *input1,*input2,*input3;
-	  input1 = fopen( "Datasets/Greece/sample_mbr.txt", "r");
-	  input3 = fopen( "Datasets/Greece/rect_point_intersect.txt", "a");
+
 	
-
-	 if (input1 == NULL)
-	 {
-	 printf("Error reading rectdata\n");
-	 }
-	 int x,y;
-	 for(int i=1198; i<23268; i++)
-	 {
-		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
-		//printf("i %f,%f,%f,%f\n",r1[0],r1[1],r1[2],r1[3]);
-		input2 = fopen( "Datasets/Greece/sample.txt", "r");
-		for(int j=0; j<98600; j++)
-		{
-			
-			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[1],&r2[2],&r2[3]);
-			//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
-			//cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
-			if(intersects(r1,r2))
-				{
-				if(!(r1[0]==r2[0] && r1[2]==r2[2] && r1[1]==r2[1] && r1[3]==r1[3])){
-					fprintf(input3,"%d\t%d\t\t%f\t%f\t%f\t%f%s%d%s%f\t%f\t%f\t%f\n",x,y,r1[0],r1[2],r1[1],r1[3]," Intersects ",intersects(r1,r2),"  ",r2[0],r2[2],r2[1],r2[3]);
-					}
-				}
-			
-			
-		}
-		fclose(input2);
-
-		
-	}
-	 fclose(input1);
-	 fclose(input3);
 
 	
 
 	//delete rt_obs;
-	//delete ognn;
+	delete ognn_gnn;
 
 	//generate_input();
 	//exp_vary_k("C");

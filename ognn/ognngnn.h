@@ -21,6 +21,9 @@ public:
 	void ognnUsingEGNN(Point2D queryPoints[],int numOfQueryPoints,int k,double kNearestNeighbor[][3],RTree* rt_obstacle,RTree* rt_dataPoints,int function);
 	void ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
 		RTree* rt_dataPoints,int function);
+	bool pointInsideTheIntersectionOfCircle(float* p, Point2D queryPoints[],int numOfQueryPoints,double radius);
+	void ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
+		RTree* rt_dataPoints,int function);
 	
 };
 
