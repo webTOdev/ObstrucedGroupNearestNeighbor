@@ -28,8 +28,7 @@ class ObstructedDistance
 public:
 	//function=0 sum , function=1 max
 	double computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
-		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,
-		vector<string> obstacleString,int function);
+		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function);
 	bool doesLineAndObstcaleIntersects(tLinestring ls,tPolygon p);
 
 	//LineString creation 
@@ -46,6 +45,12 @@ public:
 	bool checkIntersectionWithSP(float* q,vector< MyShortestPath>& shortestPath_p_qi,double obs[5],
 		VisibilityGraph* initialVisGraph);
 	void addOrReplaceSP(float* q,vector< MyShortestPath>& shortestPath_p_qi,vector<int>& shortestPath);
+	void removeDataPointFromVG(VisibilityGraph* initialVisGraph,float* q);
+	void removePointAndQueryPointsFromVisGraph(VisibilityGraph* initialVisGraph,
+				float* p, Point2D queryPoints[],int numOfQueryPoints);
+	bool visGraphContainsPoly(char buffer[1024]);
+	void writeQueryPointsInFile(Point2D queryPoints[],int numOfQueryPoints);
+	void addDataPointInVG(VisibilityGraph* initialVisGraph,float* q);
 
 };
 

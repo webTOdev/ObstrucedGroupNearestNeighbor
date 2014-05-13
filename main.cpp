@@ -1931,10 +1931,9 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][1] = 8;
 
 
-	vector<string> obstacleString;
 	ObstructedDistance* oDist = new ObstructedDistance();
 	oDist->computeAggObstructedDistance(new VisibilityGraph(),
-		m,queryPoints,3,rt_obs,obstacleString,0);
+		m,queryPoints,3,rt_obs,0);
 
 /*	srt->Point_BFN_kGNNQ(queryPoints,10,kNearestNeighbor,3);
 	for(int i=0;i<10;i++){

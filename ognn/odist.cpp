@@ -4,6 +4,7 @@ using namespace std;
 
 char *VISGRAPH_FILE = "Datasets/visibilityGraphPolygons.txt";
 VisibilityGraphController* vgController;
+vector<string> obstacleList;
 
 //Checks whether the line and obstacle intersect
 bool ObstructedDistance::doesLineAndObstcaleIntersects(tLinestring ls,tPolygon p){
@@ -42,7 +43,7 @@ tPolygon ObstructedDistance::createPolygon(double obstacle[5]){
 	return poly;
 }
 
-void removeDataPointFromVG(VisibilityGraph* initialVisGraph,float* q){
+void ObstructedDistance::removeDataPointFromVG(VisibilityGraph* initialVisGraph,float* q){
 
 	char buffer[1024];
 	_snprintf(buffer, sizeof(buffer),
@@ -51,7 +52,7 @@ void removeDataPointFromVG(VisibilityGraph* initialVisGraph,float* q){
 	initialVisGraph = vgController->removeDataPointFromVisGraph(initialVisGraph,initialVisGraph->searchObsWithString(buffer));
 }
 
-void removePointAndQueryPointsFromVisGraph(VisibilityGraph* initialVisGraph,
+void ObstructedDistance::removePointAndQueryPointsFromVisGraph(VisibilityGraph* initialVisGraph,
 		float* p, Point2D queryPoints[],int numOfQueryPoints){
 
 	removeDataPointFromVG(initialVisGraph,p);
@@ -62,9 +63,31 @@ void removePointAndQueryPointsFromVisGraph(VisibilityGraph* initialVisGraph,
 
 }
 
+void ObstructedDistance::addDataPointInVG(VisibilityGraph* initialVisGraph,float* q){
+
+	char buffer[1024];
+	_snprintf(buffer, sizeof(buffer),
+				"%s%f %f,%f %f%s", "polygon((",
+				q[0],q[1], q[0],q[1], "))");
+	Obstacle* obs = createObstacle(buffer);
+	initialVisGraph = vgController->addNewObstacleForIncrementalVisGraph(initialVisGraph, obs);
+	obstacleList.push_back(buffer);
+}
+
+bool ObstructedDistance::visGraphContainsPoly(char buffer[1024]) {
+	
+	printf("%s - ",buffer);
+	for(int i=0;i<obstacleList.size();i++){
+		printf("%s \n",obstacleList[i].c_str());
+		if (obstacleList[i].c_str() == buffer)
+		return true;
+	}
+
+	return false;
+}
+
 double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
-		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,
-		vector<string> obstacleString,int function){
+		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function){
 
 	double dist_OG=-1;
 	vector<float*> l_Q;
@@ -87,10 +110,11 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	}
 	std::sort(dist_O_p_qi.begin(), dist_O_p_qi.end(), more_than_key());
 	bool firstIteration=true;
+	bool pAdded=false;
 	if (remove(VISGRAPH_FILE) != 0)
 		perror("Error deleting file ");
 	//For once
-	writePointAndQueryPointsInFile(p,queryPoints,numOfQueryPoints);
+	writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	constructInitialVisGraph(initialVisGraph);
 	//Rectangle_BFN_NNQ will be called only once, so handling it from outside
 	double obstacle[5];
@@ -98,7 +122,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
 			obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);
 	double dmax= dist_O_p_qi[0].distance;
-	if(obstacle[4]<=dmax){
+	if(obstacle[4]<dmax){
 			obsInRange.push_back(obstacle);
 	}
 	//retrieve_kth_BFN_Rectangle_NNQ retrieves an obstacle whose value> dmax which has to be considered in next round
@@ -106,12 +130,11 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	do{
 		dmax= dist_O_p_qi[0].distance;
 		printf("dmax %lf\n",dmax);	
-		
 
 		while(1){
 			double nObstacle[5];
 			if(! firstIteration){
-				if(extraObs[4]<=dmax){
+				if(extraObs[4]<dmax){
 					obsInRange.push_back(extraObs);
 				}
 				//If the last obstacle gave a bigger value than current dmax than no need to check for the next
@@ -121,7 +144,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 			rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,p);
 			printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",
 				nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);
-			if(nObstacle[4]<=dmax){				
+			if(nObstacle[4]<dmax){				
 				obsInRange.push_back(nObstacle);
 			}
 			else {
@@ -160,6 +183,11 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 				//printf("Intersect %d q=%d\n",intersect,k);
 				if(intersect){
 					l_Q.push_back(queryPoints[k]);
+					//p will be added at the first iteration and removed after the algo terminates
+					if(!pAdded){
+						addDataPointInVG(initialVisGraph,p);
+						pAdded=true;
+					}
 				
 					char buffer[1024];
 
@@ -171,10 +199,14 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 						obs[2], "))");
 
 						if(! obsAdded){
-							Obstacle* newObs = createObstacle(buffer);
-							initialVisGraph = vgController->addNewObstacleForIncrementalVisGraph(
-								initialVisGraph, newObs);
+							if (!visGraphContainsPoly(buffer)) {
+								Obstacle* newObs = createObstacle(buffer);
+								initialVisGraph = vgController->addNewObstacleForIncrementalVisGraph(
+									initialVisGraph, newObs);
+								obstacleList.push_back(buffer);
+							}
 							obsAdded=true;
+
 						}
 						
 				}
@@ -201,6 +233,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 		//Sort the obstructed distance as some distance may be updated by now
 		std::sort(dist_O_p_qi.begin(), dist_O_p_qi.end(), more_than_key());
 		//Only new obstacle retrived will be checked in next iteration
+		//Other obstacles are already considered and added in the vis graph
 		obsInRange.clear();
 
 	}
@@ -215,8 +248,8 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 
 	delete q;
 	delete extraObs;
-	//Set the VisGraph in the initial state , next time new p and querypoints will be added again
-	//removePointAndQueryPointsFromVisGraph(initialVisGraph,p,queryPoints,numOfQueryPoints);
+	//Set the VisGraph in the initial state , next time new p  will be added again
+	removeDataPointFromVG(initialVisGraph,p);
 	return dist_OG;
 
 }
@@ -333,7 +366,7 @@ void ObstructedDistance::constructInitialVisGraph(VisibilityGraph* initialVisGra
 		/* Printing goes here. */
 		//cout << line << endl;
 		//Keeping all the polygon string in a vector so that next time we get which obstacles are already added in VisGraph
-		//obstacleString.push_back(line);
+		obstacleList.push_back(line);
 		obs = createObstacle(line);
 		obsList.push_back(obs);
 	}
@@ -349,6 +382,12 @@ void ObstructedDistance::constructInitialVisGraph(VisibilityGraph* initialVisGra
 }
 void ObstructedDistance::writePointAndQueryPointsInFile(float* p,Point2D queryPoints[],int numOfQueryPoints){
 	writePointInFile(p);
+	writeQueryPointsInFile(queryPoints,numOfQueryPoints);
+	
+
+}
+void ObstructedDistance::writeQueryPointsInFile(Point2D queryPoints[],int numOfQueryPoints){
+
 	float *q;
 	for(int i=0;i<numOfQueryPoints;i++){
 		q = new float[2];
@@ -358,7 +397,6 @@ void ObstructedDistance::writePointAndQueryPointsInFile(float* p,Point2D queryPo
 		delete q;
 
 	}
-
 }
 
 void ObstructedDistance::writePointInFile(float* p){
