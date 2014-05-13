@@ -22,6 +22,7 @@
 
 //VisibilityGraphController* vg;
 void print(std::vector < MyStruct >& ognn_sorted,std::vector < MyStruct >& egnn_sorted,int k);
+void centroidOfQ(Point2D queryPoints[], int numOfQueryPoints, Point2D centroid[]);
 
 void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
@@ -103,6 +104,99 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	delete kNN_point;
 	delete obstructedDistance;
 	delete initialVisGraph;
+	delete rt_dataPoints->kGNNHeap;
+}
+
+void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
+		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
+		RTree* rt_dataPoints,int function) {
+
+	float centroid[1][2];
+	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
+	printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
+	
+	//kNearestNeighbour holds the kGNN Euclidean
+	rt_dataPoints->Point_BFN_kGNNQ(centroid, k, kNearestNeighbor,1);
+	
+	printf("\nk- Nearest Neighbor of centroid (%f,%f)is ", centroid[0][0],centroid[0][1]);
+	for(int index=0;index<k;index++){
+		printf("(%f,%f) dist %lf\t", kNearestNeighbor[index][0], kNearestNeighbor[index][1],kNearestNeighbor[index][2]);
+	}
+
+	//Add the query points in the vis graph -- **only once**
+	VisibilityGraph* initialVisGraph = new VisibilityGraph();
+	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
+	obstructedDistance->constructInitialVisGraph(initialVisGraph);
+
+		//This vector will store the obstructed group NN
+	std::vector < MyStruct > ognn_sorted,enn_centroid_sorted;
+	printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
+	float *kNN_point,*q;
+	
+	for(int i=0;i<k;i++){
+		//To sort the aggregate euclidean distance of p and Q
+		kNN_point = new float[3];
+		kNN_point[0] = kNearestNeighbor[i][0];
+		kNN_point[1] = kNearestNeighbor[i][1];
+		kNN_point[2] = kNearestNeighbor[i][2];
+		//printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
+		enn_centroid_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
+		//Compute aggObstructedDistance
+		double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+		ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
+		printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);	
+	}
+
+	std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), more_than_key());
+	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
+	print(enn_centroid_sorted,ognn_sorted,k);
+	double dkmax_e=enn_centroid_sorted[0].distance;
+	double dkmax_o=ognn_sorted[0].distance;
+	
+		double nearestNeighbor[3];
+		while(dkmax_e < dkmax_o/numOfQueryPoints){
+			printf("dkmax_e %lf  dkmax_o %lf",dkmax_e,dkmax_o/numOfQueryPoints);
+
+		//Find next Group Nearest Neighbour
+			kNN_point = new float[3];
+			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1);
+			kNN_point[0]=nearestNeighbor[0];
+			kNN_point[1]=nearestNeighbor[1];
+			kNN_point[2]=nearestNeighbor[2];
+			enn_centroid_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
+			printf("\nEuclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
+			dkmax_e = kNN_point[2];
+			double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+			if(aggObsDist<=dkmax_o){			
+				ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
+				//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
+				printf("New OGNN found\n");
+				dkmax_o=aggObsDist;
+			}
+		}
+
+		std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), more_than_key());
+		std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
+		print(enn_centroid_sorted,ognn_sorted,k);
+
+
+	delete kNN_point;
+	delete obstructedDistance;
+	delete initialVisGraph;
+	delete rt_dataPoints->kGNNHeap;
+}
+
+void centroidOfQ(Point2D queryPoints[], int numOfQueryPoints, Point2D centroid[]){
+	float x=0.0;
+	float y=0.0;
+	for(int i=0;i<numOfQueryPoints;i++){
+		x+=queryPoints[i][0];
+		y+=queryPoints[i][1];
+	}
+	centroid[0][0]=x/numOfQueryPoints;
+	centroid[0][1]=y/numOfQueryPoints;
+
 }
 
 void print(std::vector < MyStruct >& egnn_sorted,std::vector < MyStruct >& ognn_sorted,int k){

@@ -1936,23 +1936,29 @@ int main(int argc, char* argv[]) {
 	oDist->computeAggObstructedDistance(new VisibilityGraph(),m,queryPoints,3,rt_obs,0);*/
 	double kNearestNeighbor[20][3]; //
 	OGNN_GNN *ognn_gnn = new OGNN_GNN();
-	ognn_gnn->ognnUsingEGNN(queryPoints,3,2,kNearestNeighbor, rt_obs,rt,0);
+	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
+
+	ognn_gnn->ognnSumUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
 	//delete srt->kGNNHeap;
 
-
-/*	srt->Point_BFN_kGNNQ(queryPoints,10,kNearestNeighbor,3);
-	for(int i=0;i<10;i++){
-		printf("%d-Group Nearest Neighbor of is ------%f,%f------\n", i,
-			kNearestNeighbor[i][0], kNearestNeighbor[i][1]);
+	/*float q[1][2];
+	q[0][0] = 12;
+	q[0][1] = 12;
+	double kNN[20][3]; 
+	rt->Point_BFN_kGNNQ(q,5,kNN,1);
+	for(int i=0;i<5;i++){
+		printf("%d-Group Nearest Neighbor of is ------(%f,%f) is dist %lf------\n", i,
+			kNN[i][0], kNN[i][1],kNN[i][2]);
 	}
 
-	for(int i=2;i<70;i++){
-	srt->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,3);
+	double kNNP[3];
+	for(int i=0;i<6;i++){
+		rt->retrieve_kth_BFN_GNNQ(kNNP,q,1);
 	//srt->print_tree();
-	printf("\n Next %d- Group Nearest Neighbor of (%f,%f)",i,nearestNeighbor[0],nearestNeighbor[1]);
+		printf("\n Next %d- Group Nearest Neighbor of (%f,%f) dist %lf",i,kNNP[0],kNNP[1],kNNP[2]);
 	}
-
 */
+
 	//change k
 /*	for (int k = 2; k <= 3; k = k + 1) {
 		double kNearestNeighbor[20][2]; //

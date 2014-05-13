@@ -76,9 +76,7 @@ void ObstructedDistance::addDataPointInVG(VisibilityGraph* initialVisGraph,float
 
 bool ObstructedDistance::visGraphContainsPoly(char buffer[1024]) {
 	
-	printf("%s - ",buffer);
 	for(int i=0;i<obstacleList.size();i++){
-		printf("%s \n",obstacleList[i].c_str());
 		if (obstacleList[i].c_str() == buffer)
 		return true;
 	}
