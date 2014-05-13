@@ -125,7 +125,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	double* extraObs = new double[5];
 	do{
 		dmax= dist_O_p_qi[0].distance;
-		printf("dmax %lf\n",dmax);	
+		//printf("dmax %lf\n",dmax);	
 
 		while(1){
 			double nObstacle[5];
@@ -249,7 +249,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	}
 	//The rectangle heap from obs Rtree as it will be recreated for the next p
 	delete rt_obstacle->rectangleNNHeap;
-	printf("\n odist %lf",dist_OG);
+	//printf("\n odist %lf",dist_OG);
 	return dist_OG;
 
 }
@@ -338,7 +338,7 @@ double ObstructedDistance::computeObstructedDistance(VisibilityGraph* initialVis
 	int maxVertexNum = drawAndWriteFileVisEdges(initialVisGraph->edges);
 	double shortestPathDistance = initialVisGraph->findShortestPath(p[0], p[1],
 			q[0], q[1],maxVertexNum,shortestPath);
-	int i = 0;
+	/*int i = 0;
 	//Print the Shortest Path
 	printf("--------The Shortest Path is :");
 	while (i<shortestPath.size()) {
@@ -346,6 +346,7 @@ double ObstructedDistance::computeObstructedDistance(VisibilityGraph* initialVis
 		i++;
 	}
 	//printf("\nObstructed Distance found is %lf\n", shortestPathDistance);
+	*/
 	if(shortestPathDistance==infinity){
 		return infinity;
 	}

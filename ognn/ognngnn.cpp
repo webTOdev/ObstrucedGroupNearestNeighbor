@@ -21,6 +21,7 @@
 //const int infinity = 1000000000; 
 
 //VisibilityGraphController* vg;
+void print(std::vector < MyStruct >& ognn_sorted,std::vector < MyStruct >& egnn_sorted,int k);
 
 void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
@@ -62,11 +63,74 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);	
 	}
 
-	std::sort(egnn_sorted.begin(), egnn_sorted.end(), less_than_key());
-	std::sort(ognn_sorted.begin(), egnn_sorted.end(), less_than_key());
+	std::sort(egnn_sorted.begin(), egnn_sorted.end(), more_than_key());
+	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
+	print(egnn_sorted,ognn_sorted,k);
+	double dkmax_e=egnn_sorted[0].distance;
+	double dkmax_o=ognn_sorted[0].distance;
+
+	if(dkmax_e != dkmax_o){
+		double nearestNeighbor[3];
+		while(1){
+		//Find next Group Nearest Neighbour
+			kNN_point = new float[3];
+			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints);
+			kNN_point[0]=nearestNeighbor[0];
+			kNN_point[1]=nearestNeighbor[1];
+			kNN_point[2]=nearestNeighbor[2];
+			egnn_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
+			printf("\nAggregate Euclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
+			printf("\ndkmax = %lf \n",dkmax_o);	
+			//Euclidean distance is greater so no need to check obs dist
+			if(kNN_point[2]<=dkmax_o){
+				double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+				ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
+				//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
+				printf("New OGNN found\n");
+				dkmax_o=aggObsDist;
+			}
+			else
+				break;
+
+		}
+
+		std::sort(egnn_sorted.begin(), egnn_sorted.end(), more_than_key());
+		std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
+		print(egnn_sorted,ognn_sorted,k);
+	}
+
+
 	delete kNN_point;
 	delete obstructedDistance;
 	delete initialVisGraph;
+}
+
+void print(std::vector < MyStruct >& egnn_sorted,std::vector < MyStruct >& ognn_sorted,int k){
+	printf("\nInitial K-Euclidean Group Nearest Neighbor\n");
+	float* q;
+		for(int index=0;index<k;index++){
+		//printf("\n(%f,%f) has distance %f\n",queryPoints_sorted[j].queryPoints[0],queryPoints_sorted[j].queryPoints[1],queryPoints_sorted[j].distance);
+			q = new float[2];
+			q[0]=egnn_sorted[index].queryPoints[0];
+			q[1]=egnn_sorted[index].queryPoints[1];
+
+			printf("k=%d, (%f,%f) distance %lf \n",index,q[0], q[1],egnn_sorted[index].distance);
+
+			delete q;
+
+	}
+	printf("\nInitial K-Obstructed Group Nearest Neighbor\n");
+		for(int index=0;index<k;index++){
+		//printf("\n(%f,%f) has distance %f\n",queryPoints_sorted[j].queryPoints[0],queryPoints_sorted[j].queryPoints[1],queryPoints_sorted[j].distance);
+			q = new float[2];
+			q[0]=ognn_sorted[index].queryPoints[0];
+			q[1]=ognn_sorted[index].queryPoints[1];
+
+			printf("k=%d, (%f,%f) distance %lf \n",index,q[0], q[1],ognn_sorted[index].distance);
+
+			delete q;
+
+	}
 }
 
 
