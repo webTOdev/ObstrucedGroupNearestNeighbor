@@ -77,6 +77,7 @@ RTree::RTree(char *inpname, char *fname, int _b_length, Cache *c, int _dimension
   // construct new R-tree from a specified input textfile with rectangles
 {
     long id;
+	io_access=0;
     float x0,y0,x1,y1;
     Entry *d;
     FILE *fp;

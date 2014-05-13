@@ -20,7 +20,8 @@
 #include "./rtree/entry.h"
 #include "./blockfile/blk_file.h"
 #include "./blockfile/cache.h"
-#include "./linlist/linlist.h"
+#include "./linlist/linlist.h"main
+
 #include "./rtree/rtree_cmd.h"
 #include "./rtree/distance.h"
 #include "./his/histogram.h"
@@ -176,6 +177,7 @@ public:
 	//Output parameter
 	long double stime_sec;
 	long double io_access;
+	long double io_access_obs;
 	long double page_faults;
 
 
@@ -185,6 +187,7 @@ public:
 	
 		stime_sec = 0.0;
 		io_access=0.0;
+		io_access_obs=0.0;
 		page_faults = 0.0;
 		
 	}
@@ -1825,11 +1828,12 @@ void print_output(char *s1, Exp_stat *e) {
 	}
 
 	fprintf(outputFile1,
-			"k = %d\tgrp size =%d\ttime = %.5lf sec\tio_access=%.5lf\n",
+			"k = %d\tgrp size =%d\ttime = %.5lf sec\tio_access_rtee=%.5lf\tio_access_rtee_obs=%.5lf\n",
 			e->k,
 			e->grpsize, 
 			e->stime_sec / (1.0 * CLOCKS_PER_SEC * SAMPLE),
-			e->io_access
+			e->io_access,
+			e->io_access_obs
 );
 	//for(int j=0; j<g; j++)
 	//fprintf(outputFile2,"%d\t%.5lf\n", j, e->cnum_retrievals[j]/SAMPLE);
@@ -1857,6 +1861,51 @@ void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeig
 
 	print_output("result_sum.txt",sum_e);
 	delete ognn;
+	delete sum_e;
+}
+
+
+/*	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);  Algo 1
+	ognn_gnn->ognnSumUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0); Algo 2
+	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 3
+	ognn_gnn->ognnMaxUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 4*/
+void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][3],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache,int algoNum){
+	Stopwatch sw1;
+	Exp_stat *sum_e=new Exp_stat();
+	sum_e->k=k;
+	sum_e->grpsize=groupSize;
+	int last_pf = cache->page_faults;
+	//..........
+
+		
+	sw1.start();
+	OGNN_GNN *ognn_gnn = new OGNN_GNN();
+	char* fileName;
+	if(algoNum==1){
+	ognn_gnn->ognnUsingEGNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,0);
+	fileName="Result/ognnSumUsingEGNN.txt";
+	}
+	if(algoNum==2){
+	ognn_gnn->ognnSumUsingNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,0);
+	fileName="Result/ognnSumUsingNN.txt";
+	}
+	if(algoNum==3){
+	ognn_gnn->ognnUsingEGNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,1);
+	fileName="Result/ognnMaxUsingEGNN.txt";
+	}
+	if(algoNum==4){
+	ognn_gnn->ognnMaxUsingNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,1);
+	fileName="Result/ognnMaxUsingNN.txt";
+	}
+	sw1.stop();
+	sum_e->stime_sec += sw1.getDiff();
+	sum_e->io_access = rt->io_access;
+	sum_e->io_access_obs = rt_obs->io_access;
+//	sum_e->page_faults += cache->page_faults - last_pf;
+
+
+	print_output(fileName,sum_e);
+	delete ognn_gnn;
 	delete sum_e;
 }
 //----------------------------------- main -----------------------------------
@@ -1919,31 +1968,31 @@ int main(int argc, char* argv[]) {
 
 	int group_size=3;
 	float queryPoints[3][2];
-	/*queryPoints[0][0] = 506364;
+	queryPoints[0][0] = 506364;
 	queryPoints[0][1] = 4583290;
 	queryPoints[1][0] = 501098;
 	queryPoints[1][1] = 4582444;
 	queryPoints[2][0] = 501774;
-	queryPoints[2][1] = 4581595;*/
+	queryPoints[2][1] = 4581595;
 
-	queryPoints[0][0] = 10;
+	/*queryPoints[0][0] = 10;
 	queryPoints[0][1] = 10;
 	queryPoints[1][0] = 11;
 	queryPoints[1][1] = 11;
 	queryPoints[2][0] = 8;
-	queryPoints[2][1] = 8;
+	queryPoints[2][1] = 8;*/
 
 
 	/*ObstructedDistance* oDist = new ObstructedDistance();
 	oDist->computeAggObstructedDistance(new VisibilityGraph(),m,queryPoints,3,rt_obs,0);*/
-	double kNearestNeighbor[20][3]; //
+	/*double kNearestNeighbor[20][3]; //
 	OGNN_GNN *ognn_gnn = new OGNN_GNN();
 	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
 	ognn_gnn->ognnSumUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);
 	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1);
 	ognn_gnn->ognnMaxUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1);
 
-	
+	*/
 
 	
 	//delete srt->kGNNHeap;
@@ -1967,13 +2016,15 @@ int main(int argc, char* argv[]) {
 */
 
 	//change k
-/*	for (int k = 2; k <= 3; k = k + 1) {
-		double kNearestNeighbor[20][2]; //
-		printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
-		exp_ognn_sum(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache);
-		delete srt->kGNNHeap;
+	for (int k = 2; k <= 16; k = k + 1) {
+		for(int algo=1;algo<5;algo++){
+			double kNearestNeighbor[20][3]; //
+			printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
+			exp_ognn(queryPoints,group_size,k,kNearestNeighbor, rt_obs,rt,cache_obs,cache,algo);
+			//delete srt->kGNNHeap;
+		}
 	}
-*/
+
 	delete cache;
 	//delete srt;
 	//delete rt;
@@ -1991,7 +2042,7 @@ int main(int argc, char* argv[]) {
 	
 
 	//delete rt_obs;
-	delete ognn_gnn;
+//	delete ognn_gnn;
 
 	//generate_input();
 	//exp_vary_k("C");
