@@ -50,7 +50,7 @@ const double THRESHOLD = 0.000000001;
 
 //Experiments Parameters
 
-const int SAMPLE = 5;
+const int SAMPLE = 1;
 //DEFAULT
 const int DEFAULT_GRPSIZE = 64;
 const int DEFAULT_K = 4;
@@ -1908,6 +1908,43 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	delete ognn_gnn;
 	delete sum_e;
 }
+
+float val(float oldVal,float min,float max){
+	float newVal=(oldVal-min)/(max-min)*MAXX;
+	return newVal;
+}
+//Normalizing real dataset into 0-10000
+void normalizeMyRealDataset(){
+	 FILE *input1,*input2,*input3,*input4;
+	 input1 = fopen( "Datasets/sample_mbr.txt", "r");
+	 //input1 = fopen( "Datasets/sample_mbr.txt", "r");
+	 input2 = fopen( "Datasets/sample_mbr_norm.txt", "a");
+	
+	 float r1[4];
+	 int x;
+    // float max=0.0,min=100000000;
+	// for(int i=0; i<53428; i++)
+	/* for(int i=0; i<22070; i++)
+	 {
+		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
+
+		if(r1[0]<min) min=r1[0];if(r1[1]<min) min=r1[1];if(r1[2]<min) min=r1[2];if(r1[3]<min) min=r1[3];
+		if(r1[0]>max) max=r1[0];if(r1[1]>max) max=r1[1];if(r1[2]>max) max=r1[2];if(r1[3]>max) max=r1[3];
+
+
+	 }*/
+	 float max=4623745.000000,min=126811.500000;
+	 printf("min=%lf max=%lf\n",min,max);
+	 for(int i=0; i<22070; i++)
+	 {
+		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
+		fprintf(input2,"%ld %lf %lf %lf %lf\n",x,val(r1[0],min,max),val(r1[1],min,max),val(r1[2],min,max),val(r1[3],min,max));
+		
+	 }
+	 fclose(input1);
+	 fclose(input2);
+	
+}
 //----------------------------------- main -----------------------------------
 int main(int argc, char* argv[]) {
 
@@ -1917,6 +1954,7 @@ int main(int argc, char* argv[]) {
 	int dimension = 2;
 
 	Cache *cache = new Cache(0, blocksize);
+	//normalizeMyRealDataset();
 
 
 	//Create sample input file
@@ -2016,7 +2054,7 @@ int main(int argc, char* argv[]) {
 */
 
 	//change k
-	for (int k = 2; k <= 16; k = k + 1) {
+	for (int k = 16; k <= 16; k = k + 1) {
 		for(int algo=1;algo<5;algo++){
 			double kNearestNeighbor[20][3]; //
 			printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
