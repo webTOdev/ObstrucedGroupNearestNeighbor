@@ -1879,6 +1879,8 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 
 		
 	sw1.start();
+	rt->io_access=0.0;
+	 rt_obs->io_access=0.0;
 	OGNN_GNN *ognn_gnn = new OGNN_GNN();
 	char* fileName;
 	if(algoNum==1){
@@ -1961,7 +1963,7 @@ int main(int argc, char* argv[]) {
 	//createDataPointFile();
 	//createMBRFile();
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
+	//RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
 	//rt->print_tree();
 	//delete rt;
 	//RTree *srt = new RTree(TREEFILE,  cache);
@@ -1969,14 +1971,13 @@ int main(int argc, char* argv[]) {
 
 	Cache *cache_obs = new Cache(0,blocksize);
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
+	//RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
 	//rt_obs->print_tree();
 	//range_test(rt_obs);
-	//delete rt_obs;
 
-	//RTree *srt = new RTree(TREEFILE,  cache);
-	//RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
-	//srt_obs->print_tree();
+	RTree *srt = new RTree(TREEFILE,  cache);
+	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	//rt->print_tree();
 
 
 	float m[2];
@@ -1987,8 +1988,6 @@ int main(int argc, char* argv[]) {
 	m[1]=2;
 
 	double nearestNeighbor[5];
-
-	
 
 	//srt->print_tree();
 	//Nearest Neighbor query
@@ -2058,19 +2057,19 @@ int main(int argc, char* argv[]) {
 		for(int algo=1;algo<5;algo++){
 			double kNearestNeighbor[20][3]; //
 			printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
-			exp_ognn(queryPoints,group_size,k,kNearestNeighbor, rt_obs,rt,cache_obs,cache,algo);
+			exp_ognn(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo);
 			//delete srt->kGNNHeap;
 		}
 	}
 
 	delete cache;
-	//delete srt;
+	delete srt;
 	//delete rt;
 
 
 
 	delete cache_obs;
-	//delete srt_obs;
+	delete srt_obs;
 	//delete rt_obs;
 
 
