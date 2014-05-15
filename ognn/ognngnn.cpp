@@ -28,7 +28,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
 		RTree* rt_dataPoints,int function) {
 
-	printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");
+	//printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,numOfQueryPoints,function);
@@ -47,7 +47,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,egnn_sorted;
-	printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
+	//printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
 	float *kNN_point,*q;
 	
 	for(int i=0;i<k;i++){
@@ -87,7 +87,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 				double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
 				ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 				//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
-				printf("New OGNN found\n");
+				//printf("New OGNN found\n");
 				dkmax_o=aggObsDist;
 			}
 			else
@@ -99,7 +99,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	
 	std::sort(egnn_sorted.begin(), egnn_sorted.end(), less_than_key());
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
-	if(function==0){
+	/*if(function==0){
 		printf("********************OGNN-GNN-SUM*******************************\n");
 		FILE * outputFile1;
 		outputFile1 = fopen("Result/ognnOutput", "a+");
@@ -115,7 +115,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		fclose(outputFile1);
 	}
 	print(egnn_sorted,ognn_sorted,k);
-
+	*/
 
 	delete kNN_point;
 	delete obstructedDistance;
@@ -129,7 +129,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 	float centroid[1][2];
 	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
-	printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
+	//printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(centroid, k, kNearestNeighbor,1,function);
@@ -147,7 +147,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,enn_centroid_sorted;
-	printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
+	//printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
 	float *kNN_point,*q;
 	
 	for(int i=0;i<k;i++){
@@ -187,19 +187,19 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 			if(aggObsDist<=dkmax_o){			
 				ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 				//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
-				printf("New OGNN found\n");
+				//printf("New OGNN found\n");
 				dkmax_o=aggObsDist;
 			}
 		}
 
 		std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), less_than_key());
 		std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
-		printf("********************OGNN-CENTROID-NN-SUM*******************************\n");
+		/*printf("********************OGNN-CENTROID-NN-SUM*******************************\n");
 		FILE * outputFile1;
 		outputFile1 = fopen("Result/ognnOutput", "a+");
 		fprintf(outputFile1,"\n********************OGNN-CENTROID-NN-SUM*******************************\n");
 		fclose(outputFile1);
-		print(enn_centroid_sorted,ognn_sorted,k);
+		print(enn_centroid_sorted,ognn_sorted,k);*/
 
 
 	delete kNN_point;
@@ -214,7 +214,7 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 	float centroid[1][2];
 	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
-	printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
+	//printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(centroid, k, kNearestNeighbor,1,function);
@@ -232,7 +232,7 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,enn_centroid_sorted;
-	printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
+	//printf("\n----------------------------------------Searching for k-Obstructed GNN---------------------------------------\n");
 	float *kNN_point,*q;
 	
 	for(int i=0;i<k;i++){
@@ -273,7 +273,7 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 				if(aggObsDist<=dkmax_o){			
 					ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 					//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
-					printf("New OGNN found\n");
+					//printf("New OGNN found\n");
 					dkmax_o=aggObsDist;
 				}
 			}
@@ -281,12 +281,12 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), less_than_key());
 		std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
-		printf("********************OGNN-CENTROID-NN-MAX*******************************\n");
+		/*printf("********************OGNN-CENTROID-NN-MAX*******************************\n");
 		FILE * outputFile1;
 		outputFile1 = fopen("Result/ognnOutput", "a+");
 		fprintf(outputFile1,"\n********************OGNN-CENTROID-NN-MAX*******************************\n");
 		fclose(outputFile1);
-		print(enn_centroid_sorted,ognn_sorted,k);
+		print(enn_centroid_sorted,ognn_sorted,k);*/
 
 
 	delete kNN_point;

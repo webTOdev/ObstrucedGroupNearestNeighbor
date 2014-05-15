@@ -119,6 +119,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	if(obstacle[4]<dmax){
 			obsInRange.push_back(obstacle);
 	}
+	int count=0;
 	//retrieve_kth_BFN_Rectangle_NNQ retrieves an obstacle whose value> dmax which has to be considered in next round
 	double* extraObs = new double[5];
 	do{
@@ -136,7 +137,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 					break;
 			}
 			rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,p);
-			/*printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",
+			/*printf("%d Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",count++,
 				nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);*/
 			if(nObstacle[4]<dmax){				
 				obsInRange.push_back(nObstacle);
