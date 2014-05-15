@@ -179,6 +179,7 @@ public:
 	long double io_access;
 	long double io_access_obs;
 	long double page_faults;
+	long float qArea;
 
 
 	Exp_stat() {
@@ -189,6 +190,7 @@ public:
 		io_access=0.0;
 		io_access_obs=0.0;
 		page_faults = 0.0;
+		qArea=0.0;
 		
 	}
 	;
@@ -1457,6 +1459,8 @@ void exp_vary_DATASET(char *d) {
 	 */
 }
 
+
+
 //--------------------------GENERATE INPUT RECTANGLES-------------------------
 void generate_g_rectangle(int n_sample, int g_size, double m_area_part,
 		double m_ratio1, double m_ratio2, char *s1, char *s2) {
@@ -1717,9 +1721,9 @@ void generate_input() {
 void createDataPointFile(){
 	double temp,x1,x2,y1,y2;
 	long id=0;
-	char* dataPointFile="Datasets/Greece/rivers/rivers.txt";
+	char* dataPointFile="Datasets/Germany/hypsogr_0/hypsogr.txt";
 
-	FILE * output = fopen(DATAFILE, "w");
+	FILE * output = fopen(DATAFILE, "a");
 	if (output == NULL) {
 			printf("Cannot open file %s", DATAFILE);
 	}
@@ -1744,7 +1748,23 @@ void createDataPointFile(){
 
 
 }
+bool pointAtBoundary(float* point,float* mbr){
+	
+	bool atboundary=false;
 
+	if(mbr[0]==point[0] && mbr[2]<=point[1] && mbr[3]>=point[1])
+		atboundary=true;
+	if(mbr[2]==point[1] && mbr[0]<=point[0] && mbr[1]>=point[0])
+		atboundary=true;
+	if(mbr[1]==point[0] && mbr[2]<=point[1] && mbr[3]>=point[1])
+		atboundary=true;
+	if(mbr[3]==point[1] && mbr[0]<=point[0] && mbr[1]>=point[0])
+		atboundary=true;
+
+	return atboundary;
+
+	
+}
 bool intersects(float* mbr,float* bounces){
 	
 	bool inside;
@@ -1767,15 +1787,100 @@ bool intersects(float* mbr,float* bounces){
 	}
 }
 
+void generateIntersectFreePoints(){
+
+	float r1[4];
+	float r2[4];
+	float point[2],mbr[4];
+
+	
+	int x,y;
+	FILE *input1,*input2,*input3;
+	input1 = fopen( "Datasets/sample.txt", "r");
+	input3 = fopen( "Datasets/sample_point.txt", "a");
+	int index=0;
+	 for(int i=0; i<307992; i++)
+	 {
+		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
+		//printf("i %f,%f,%f,%f\n",r1[0],r1[1],r1[2],r1[3]);
+		input2 = fopen( "Datasets/sample_mbr.txt", "r");
+		bool noIntersect=true;
+		for(int j=0; j<34334; j++)
+		{
+			
+			fscanf(input2,"%d%f%f%f%f",&y,&r2[0],&r2[1],&r2[2],&r2[3]);
+			//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
+			//cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
+			if(intersects(r1,r2))
+			{
+				point[0]=r1[0];point[1]=r1[2];
+				if(!(r1[0]==r2[0] && r1[2]==r2[2] && r1[1]==r2[1] && r1[3]==r1[3])){
+					if(! pointAtBoundary(point,r2)){
+						noIntersect=false;
+						break;
+					}
+					//else
+					//	printf("\n at boundary\n");
+					//fprintf(input3,"%d\t%d\t\t%f\t%f\t%f\t%f%s%d%s%f\t%f\t%f\t%f\n",x,y,r1[0],r1[2],r1[1],r1[3]," Intersects ",intersects(r1,r2),"  ",r2[0],r2[2],r2[1],r2[3]);
+				}
+				
+			}
+		}
+		if(noIntersect){
+			//printf("\n %d ",x);
+			fprintf(input3,"%ld %lf %lf %lf %lf\n",index,r1[0],r1[1],r1[2],r1[3]);
+			index++;		
+		}
+		fclose(input2);
+
+		
+	 }
+	 fclose(input1);
+	 fclose(input3);
+
+}
+
+
+
+void createPointMBRFile(){
+	double temp,x1,x2,y1,y2;
+	int id;
+
+	char* dataPointFile="Datasets/Greece/cities_loc/cities_loc.txt";
+
+	ifstream iFile(dataPointFile);
+
+	FILE * output = fopen(DATAFILE, "a");
+	if (output == NULL) {
+			printf("Cannot open file %s", DATAFILE);
+	}
+	string line;
+
+	while (getline(iFile, line)) {
+		//cout << line << endl;
+		 std::istringstream in(line);
+		 in >> id >> x1 >> y1 ;
+		 fprintf(output,"%ld %lf %lf %lf %lf\n",id,x1,x1,y1,y1);
+
+	}
+	iFile.close();
+	fclose(output);
+
+
+
+
+}
+
+
 void createMBRFile(){
 	double temp,x1,x2,y1,y2;
 	int id;
 
-	char* dataPointFile="Datasets/Greece/roads_1/roads.txt";
+	char* dataPointFile="Datasets/Germany/rrlines_0/rrlines.txt";
 
 	ifstream iFile(dataPointFile);
 
-	FILE * output = fopen(DATAFILE_MBR, "w");
+	FILE * output = fopen(DATAFILE_MBR, "a");
 	if (output == NULL) {
 			printf("Cannot open file %s", DATAFILE);
 	}
@@ -1828,9 +1933,10 @@ void print_output(char *s1, Exp_stat *e) {
 	}
 
 	fprintf(outputFile1,
-			"k = %d\tgrp size =%d\ttime = %.5lf sec\tio_access_rtee=%.5lf\tio_access_rtee_obs=%.5lf\n",
+			"k = %d\tgrp size =%d\tQuery Area = %lf\ttime = %.5lf sec\tio_access_rtree=%.5lf\tio_access_rtree_obs=%.5lf\n",
 			e->k,
 			e->grpsize, 
+			e->qArea,
 			e->stime_sec / (1.0 * CLOCKS_PER_SEC * SAMPLE),
 			e->io_access,
 			e->io_access_obs
@@ -1864,12 +1970,7 @@ void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeig
 	delete sum_e;
 }
 
-
-/*	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);  Algo 1
-	ognn_gnn->ognnSumUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0); Algo 2
-	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 3
-	ognn_gnn->ognnMaxUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 4*/
-void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][3],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache,int algoNum){
+void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][3],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache,int algoNum,float qArea){
 	Stopwatch sw1;
 	Exp_stat *sum_e=new Exp_stat();
 	sum_e->k=k;
@@ -1880,7 +1981,7 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 		
 	sw1.start();
 	rt->io_access=0.0;
-	 rt_obs->io_access=0.0;
+	rt_obs->io_access=0.0;
 	OGNN_GNN *ognn_gnn = new OGNN_GNN();
 	char* fileName;
 	if(algoNum==1){
@@ -1903,6 +2004,7 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	sum_e->stime_sec += sw1.getDiff();
 	sum_e->io_access = rt->io_access;
 	sum_e->io_access_obs = rt_obs->io_access;
+	sum_e->qArea=qArea;
 //	sum_e->page_faults += cache->page_faults - last_pf;
 
 
@@ -1911,6 +2013,50 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	delete sum_e;
 }
 
+/*	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0);  Algo 1
+	ognn_gnn->ognnSumUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,0); Algo 2
+	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 3
+	ognn_gnn->ognnMaxUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 4*/
+void exp_ognn_varyk(){
+	float queryPoints[4][2];
+	int groupSize=4;
+	//generate_queryPoints(queryPoints,4);
+	float qArea=0.005;
+	
+	for (int k = 4; k <= 8; k = k*2 ) {
+		for(int algo=1;algo<5;algo++){
+			FILE *input1;
+			input1 = fopen( "Result/Input/k/vary_k_g_4_qa_005.txt", "r");
+			for(int sample=0;sample<1;sample++){
+				double kNearestNeighbor[64][3]; 
+				int blocksize = 1024;			//4096;//1024;//4096;
+				int b_length = 1024;
+				int dimension = 2;
+				
+			    int x;
+			    for(int i=0; i<4; i++)
+			    {
+			        fscanf(input1,"%ld%f%f",&x,&queryPoints[i][0],&queryPoints[i][1]);
+				}
+
+				Cache *cache = new Cache(0, blocksize);
+				Cache *cache_obs = new Cache(0,blocksize);
+
+				RTree *srt = new RTree(TREEFILE,  cache);
+				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+				printf("\n------------  Group Size %d , k = %d , Algo Num = %d  ----------\n",groupSize,k,algo);
+				exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
+				delete cache;
+				delete srt;
+				delete cache_obs;
+				delete srt_obs;
+			}
+			fclose(input1);
+		}
+	}
+}
+
+
 float val(float oldVal,float min,float max){
 	float newVal=(oldVal-min)/(max-min)*MAXX;
 	return newVal;
@@ -1918,15 +2064,16 @@ float val(float oldVal,float min,float max){
 //Normalizing real dataset into 0-10000
 void normalizeMyRealDataset(){
 	 FILE *input1,*input2,*input3,*input4;
-	 input1 = fopen( "Datasets/sample_mbr.txt", "r");
-	 //input1 = fopen( "Datasets/sample_mbr.txt", "r");
-	 input2 = fopen( "Datasets/sample_mbr_norm.txt", "a");
+	 input1 = fopen( "Datasets/sample_mbr_real.txt", "r");
+	// input1 = fopen( "Datasets/sample_real.txt", "r");
+	 input2 = fopen( "Datasets/sample_mbr.txt", "a");
+	//  input2 = fopen( "Datasets/sample.txt", "a");
 	
 	 float r1[4];
 	 int x;
-    // float max=0.0,min=100000000;
-	// for(int i=0; i<53428; i++)
-	/* for(int i=0; i<22070; i++)
+     /*float max=0.0,min=100000000;
+	 for(int i=0; i<307993; i++)
+	 //for(int i=0; i<2755; i++)
 	 {
 		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
 
@@ -1935,9 +2082,13 @@ void normalizeMyRealDataset(){
 
 
 	 }*/
-	 float max=4623745.000000,min=126811.500000;
+	 float max=403.000000,min=9500.00000;
 	 printf("min=%lf max=%lf\n",min,max);
-	 for(int i=0; i<22070; i++)
+	 fclose(input1);
+	// input1 = fopen( "Datasets/sample_real.txt", "r");
+	  input1 = fopen( "Datasets/sample_mbr_real.txt", "r");
+	 for(int i=0; i<34334; i++)
+	 //for(int i=0; i<2755; i++)
 	 {
 		fscanf(input1,"%d%f%f%f%f",&x,&r1[0],&r1[1],&r1[2],&r1[3]);
 		fprintf(input2,"%ld %lf %lf %lf %lf\n",x,val(r1[0],min,max),val(r1[1],min,max),val(r1[2],min,max),val(r1[3],min,max));
@@ -1955,17 +2106,20 @@ int main(int argc, char* argv[]) {
 	int b_length = 1024;
 	int dimension = 2;
 
+	//createPointMBRFile();
+
 	Cache *cache = new Cache(0, blocksize);
 	//normalizeMyRealDataset();
+	//generateIntersectFreePoints();
 
 
 	//Create sample input file
 	//createDataPointFile();
 	//createMBRFile();
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	//RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
+	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
 	//rt->print_tree();
-	//delete rt;
+	delete rt;
 	//RTree *srt = new RTree(TREEFILE,  cache);
 	//srt->print_tree();
 
@@ -1974,18 +2128,41 @@ int main(int argc, char* argv[]) {
 	//RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
 	//rt_obs->print_tree();
 	//range_test(rt_obs);
+	//delete rt_obs;
 
-	RTree *srt = new RTree(TREEFILE,  cache);
-	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
-	//rt->print_tree();
+	//RTree *srt = new RTree(TREEFILE,  cache);
+	//RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	//srt_obs->print_tree();
+	//srt->print_tree();
 
+	/*Point2D queryPoints[1]; int numOfQueryPoints=1;
+    double kNearestNeighbor[2][3];
 
-	float m[2];
+	float centroid[1][2];
+	centroid[0][0]=1006.331543;
+	centroid[0][1]=2496.926758;
+
+	//printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
+	
+	//kNearestNeighbour holds the kGNN Euclidean
+	srt_obs->Point_BFN_kGNNQ(centroid, 1, kNearestNeighbor,1,1);
+	delete srt_obs;
+	printf("\n%lf %lf %lf \n",kNearestNeighbor[0][0],kNearestNeighbor[0][1],kNearestNeighbor[0][2]);
+	srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	double obstacle[5];
+	float c[2];
+	c[0]=1006.331543;
+	c[1]=2496.926758;
+	srt_obs->Rectangle_BFN_NNQ(c, obstacle);
+	printf("\n%lf %lf %lf %lf %lf",obstacle[0],obstacle[1],obstacle[2],obstacle[3],obstacle[4]);
+*/
+
+	//float m[2];
 	/*m[0]=415171 ;
 	m[1]=4543907;*/
 
-	m[0]=2;
-	m[1]=2;
+	//m[0]=2;
+	//m[1]=2;
 
 	double nearestNeighbor[5];
 
@@ -2003,14 +2180,14 @@ int main(int argc, char* argv[]) {
 
 //	range_test(rt);
 
-	int group_size=3;
+	/*int group_size=3;
 	float queryPoints[3][2];
 	queryPoints[0][0] = 506364;
 	queryPoints[0][1] = 4583290;
 	queryPoints[1][0] = 501098;
 	queryPoints[1][1] = 4582444;
 	queryPoints[2][0] = 501774;
-	queryPoints[2][1] = 4581595;
+	queryPoints[2][1] = 4581595;*/
 
 	/*queryPoints[0][0] = 10;
 	queryPoints[0][1] = 10;
@@ -2053,23 +2230,34 @@ int main(int argc, char* argv[]) {
 */
 
 	//change k
-	for (int k = 16; k <= 16; k = k + 1) {
+	/*for (int k = 16; k <= 16; k = k + 1) {
 		for(int algo=1;algo<5;algo++){
 			double kNearestNeighbor[20][3]; //
 			printf("\n------------  Group Size %d , k = %d   ----------\n",group_size,k);
 			exp_ognn(queryPoints,group_size,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo);
 			//delete srt->kGNNHeap;
 		}
-	}
+	}*/
+
+	/*SortedLinList *res_list = new SortedLinList();
+	float mbr[4];
+	mbr[0]=852.378845-100;
+	mbr[1]=852.378845+100;
+	mbr[2]=8286.251953-100;
+	mbr[3]=8286.251953+100;
+	srt_obs->rangeQuery(mbr, res_list);
+	res_list->print();
+*/
+	exp_ognn_varyk();
 
 	delete cache;
-	delete srt;
+//	delete srt;
 	//delete rt;
 
 
 
 	delete cache_obs;
-	delete srt_obs;
+//	delete srt_obs;
 	//delete rt_obs;
 
 
