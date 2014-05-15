@@ -61,7 +61,7 @@ vector<Line*> VisibilityGraphController::constructVisGraph(){
 		visEdges.insert(visEdges.end(),temp.begin(),temp.end());
 	}
 	visGraph->setEdges(visEdges);
-	std::cout << "Initial Visibility Graph Constructed Successfully "<<std::endl;
+	//std::cout << "Initial Visibility Graph Constructed Successfully "<<std::endl;
 	return visEdges;
 
 }
@@ -500,7 +500,7 @@ VisibilityGraph* VisibilityGraphController::addNewObstacleForIncrementalVisGraph
 		vGraph->insertEdgeInVisGraph(temp);
 	}
 
-	std::cout << "***Incremental Vis Graph*** "<<"Obstacle with ID "<<obs->id<<" added successfully in Visibility Graph"<<std::endl;
+	//std::cout << "***Incremental Vis Graph*** "<<"Obstacle with ID "<<obs->id<<" added successfully in Visibility Graph"<<std::endl;
 
 	return vGraph;
 }
@@ -527,7 +527,7 @@ VisibilityGraph* VisibilityGraphController::removeDataPointFromVisGraph(
 	}
 	//Now remove the data point
 	vGraph->removeObstacleFromVisGraph(obs);
-	std::cout << "***Incremental Vis Graph*** "<<"Obstacle with ID "<<obs->id<<" removed successfully from Visibility Graph"<<std::endl;
+	//std::cout << "***Incremental Vis Graph*** "<<"Obstacle with ID "<<obs->id<<" removed successfully from Visibility Graph"<<std::endl;
 
 
 	return vGraph;
