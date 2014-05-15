@@ -1970,6 +1970,122 @@ void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeig
 	delete sum_e;
 }
 
+void generate_points_inside_rectangle_with_point(float r_x,float r_y,float length,float width){
+
+			//The rectangle considering r_x and r_y as center
+			float m[4],r2[4],r1[4];int total=0.0,id;
+			m[0] = r_x - length / 2;
+			m[1] = r_x + length / 2;
+			m[2] = r_y - width / 2;
+			m[3] = r_y + width / 2;
+			int count=0;
+
+			while(1){
+
+					float x= fmod(rand(),(m[1]-m[0] + 1)) + m[0];
+					float y= fmod(rand(),(m[3]-m[2] + 1)) + m[2];
+					r1[0]=x;r1[1]=x;r1[2]=y;r1[3]=y;
+
+					//printf("Rect %lf,%lf,%lf,%lf\n",m[0],m[2],m[1],m[3]);
+					//printf("%lf %lf\n",x,y);
+					FILE *input1,*input2,*input3;
+					input1 = fopen( "Datasets/sample_mbr.txt", "r");
+					input2 = fopen( "Results/Input/k/vary_k_g_4_qa_005.txt", "a");
+					bool intersect=false;
+					for(int j=0; j<22070; j++)
+					{				
+						fscanf(input1,"%d%f%f%f%f",&id,&r2[0],&r2[1],&r2[2],&r2[3]);
+						//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
+						//cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
+						if(intersects(r1,r2))
+						{
+							intersect = true;
+							break;
+						}					
+					
+					}
+					if(intersect == false){
+						fprintf(input2,"%ld %lf %lf\n",total,x,y);
+						if(count==3){
+							fclose(input2);
+							fclose(input1);
+							break;
+						}
+						count++;
+						total++;
+						
+									
+					}
+					fclose(input2);
+					fclose(input1);
+			}
+
+}
+
+void generate_nonIntersectingQueryPoints(){
+	float defaultQArea=.005,r_x,r_y;float length=MAXX*defaultQArea,width=MAXY*defaultQArea;
+	srand(1000);
+	for(int i=0;i<100;i++){
+			//float x = (float)rand()/RAND_MAX*MAXX*0.005;
+			//float y = (float)rand()/RAND_MAX*MAXY*.005;
+			
+			r_x = (float)rand()/RAND_MAX*10000;
+			r_y = (float)rand()/RAND_MAX*10000;
+				
+			if ((r_x - length / 2) < 0 || (r_x + length / 2) > MAXX)
+				continue;
+			if ((r_y - width / 2) < 0 || (r_y + width / 2) > MAXY)
+				continue;
+
+			generate_points_inside_rectangle_with_point(r_x,r_y,length,width);
+		//queryPoints[i][0]=x;
+		//queryPoints[i][1]=y;
+	}
+}
+
+void generate_queryPoints(Point2D queryPoints[],int numOfQueryPoints){
+	float defaultQArea=.005,r_x,r_y;float length=50,width=50;
+	for(int i=0;i<numOfQueryPoints;i++){
+		for(int j=0;j<10;i++){
+			//float x = (float)rand()/RAND_MAX*MAXX*0.005;
+			//float y = (float)rand()/RAND_MAX*MAXY*.005;
+			srand(1000);
+			r_x = (float)rand()/RAND_MAX*10000;
+			r_y = (float)rand()/RAND_MAX*10000;
+				
+			if ((r_x - length / 2) < 0 || (r_x + length / 2) > MAXX)
+				continue;
+			if ((r_y - width / 2) < 0 || (r_y + width / 2) > MAXY)
+				continue;
+
+			generate_points_inside_rectangle_with_point(r_x,r_y,MAXX*.005,MAXY*.005);
+		}
+		//queryPoints[i][0]=x;
+		//queryPoints[i][1]=y;
+	}
+}
+void writeOutputInfile(int k,double kNearestNeighbor[][3],int groupSize,string s){
+	FILE * outputFile1;
+	outputFile1 = fopen("Result/ognnOutput", "a+");
+	fprintf(outputFile1,"\n%s\n",s.c_str());
+	fprintf(outputFile1,"\n-------------k=%d , group size=%d -----------------\n",k,groupSize);
+		for(int index=0;index<k;index++){
+		//printf("\n(%f,%f) has distance %f\n",queryPoints_sorted[j].queryPoints[0],queryPoints_sorted[j].queryPoints[1],queryPoints_sorted[j].distance);
+			float* q = new float[3];
+			q[0]=kNearestNeighbor[index][0];
+			q[1]=kNearestNeighbor[index][1];
+			q[2]=kNearestNeighbor[index][2];
+
+			//printf("k=%d, (%f,%f) distance %lf \n",index,q[0], q[1],ognn_sorted[index].distance);
+			fprintf(outputFile1,"k=%d, (%f,%f) distance %lf\n",index,q[0], q[1],q[2]);
+
+			delete q;
+
+	}
+
+		fclose(outputFile1);
+}
+
 void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][3],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache,int algoNum,float qArea){
 	Stopwatch sw1;
 	Exp_stat *sum_e=new Exp_stat();
@@ -1987,18 +2103,22 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	if(algoNum==1){
 	ognn_gnn->ognnUsingEGNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,0);
 	fileName="Result/ognnSumUsingEGNN.txt";
+	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-GNN-SUM*******************************");
 	}
 	if(algoNum==2){
 	ognn_gnn->ognnSumUsingNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,0);
 	fileName="Result/ognnSumUsingNN.txt";
+	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-CENTROID-NN-SUM*******************************\n");
 	}
 	if(algoNum==3){
 	ognn_gnn->ognnUsingEGNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,1);
 	fileName="Result/ognnMaxUsingEGNN.txt";
+	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-GNN-MAX*******************************");
 	}
 	if(algoNum==4){
 	ognn_gnn->ognnMaxUsingNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,1);
 	fileName="Result/ognnMaxUsingNN.txt";
+	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-CENTROID-NN-MAX*******************************\n");
 	}
 	sw1.stop();
 	sum_e->stime_sec += sw1.getDiff();
@@ -2023,11 +2143,11 @@ void exp_ognn_varyk(){
 	//generate_queryPoints(queryPoints,4);
 	float qArea=0.005;
 	
-	for (int k = 4; k <= 8; k = k*2 ) {
+	for (int k = 4; k <= 64; k = k*2 ) {
 		for(int algo=1;algo<5;algo++){
 			FILE *input1;
 			input1 = fopen( "Result/Input/k/vary_k_g_4_qa_005.txt", "r");
-			for(int sample=0;sample<1;sample++){
+			for(int sample=0;sample<10;sample++){
 				double kNearestNeighbor[64][3]; 
 				int blocksize = 1024;			//4096;//1024;//4096;
 				int b_length = 1024;
@@ -2117,13 +2237,13 @@ int main(int argc, char* argv[]) {
 	//createDataPointFile();
 	//createMBRFile();
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
-	RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
+	//RTree *rt = new RTree(DATAFILE, TREEFILE, b_length, cache, dimension);
 	//rt->print_tree();
-	delete rt;
+	//delete rt;
 	//RTree *srt = new RTree(TREEFILE,  cache);
 	//srt->print_tree();
 
-	Cache *cache_obs = new Cache(0,blocksize);
+	//Cache *cache_obs = new Cache(0,blocksize);
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
 	//RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
 	//rt_obs->print_tree();
@@ -2250,13 +2370,13 @@ int main(int argc, char* argv[]) {
 */
 	exp_ognn_varyk();
 
-	delete cache;
+	//delete cache;
 //	delete srt;
 	//delete rt;
 
 
 
-	delete cache_obs;
+	//delete cache_obs;
 //	delete srt_obs;
 	//delete rt_obs;
 
