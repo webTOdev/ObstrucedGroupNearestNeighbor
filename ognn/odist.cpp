@@ -87,6 +87,7 @@ bool ObstructedDistance::visGraphContainsPoly(char buffer[1024]) {
 double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
 		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function){
 
+	Clock sw1;
 	double dist_OG=-1;
 	vector<float*> l_Q;
 	vector<double*> obsInRange;
@@ -179,7 +180,10 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 					l_Q.push_back(queryPoints[k]);
 					//p will be added at the first iteration and removed after the algo terminates
 					if(!pAdded){
+						sw1.start();
 						addDataPointInVG(initialVisGraph,p);
+						sw1.stop();
+						visGraphConsTime+=sw1.getDiff();
 						pAdded=true;
 					}
 				
@@ -195,8 +199,11 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 						if(! obsAdded){
 							if (!visGraphContainsPoly(buffer)) {
 								Obstacle* newObs = createObstacle(buffer);
+								sw1.start();
 								initialVisGraph = vgController->addNewObstacleForIncrementalVisGraph(
 									initialVisGraph, newObs);
+								sw1.stop();
+								visGraphConsTime+=sw1.getDiff();
 								obstacleList.push_back(buffer);
 							}
 							obsAdded=true;
@@ -213,7 +220,10 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 		for(int j=0;j<l_Q.size();j++){
 
 			vector<int> shortestPath;
+			sw1.start();
 			double obsDist = computeObstructedDistance(initialVisGraph,p,l_Q[j],shortestPath);
+			sw1.stop();
+			shortestPathCalcTime+=sw1.getDiff();
 			//Update obstructed dist_O(p,q_i)
 			replaceObsDist(dist_O_p_qi,l_Q[j],obsDist);
 			//shortestPath_p_qi.push_back(MyShortestPath(shortestPath, l_Q[j]));
@@ -249,7 +259,10 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	delete extraObs;
 	//Set the VisGraph in the initial state remove p if added in graph, next time new p  will be added again
 	if(pAdded){
+		sw1.start();
 		removeDataPointFromVG(initialVisGraph,p);
+		sw1.stop();
+		visGraphConsTime+=sw1.getDiff();
 	}
 	//The rectangle heap from obs Rtree as it will be recreated for the next p
 	delete rt_obstacle->rectangleNNHeap;

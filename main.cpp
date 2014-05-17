@@ -180,6 +180,10 @@ public:
 	long double io_access_obs;
 	long double page_faults;
 	long float qArea;
+	int totalNumberOfPRetrieved;
+	long double visGraphConstime_sec;
+	long double shortestPathCalctime_sec;
+
 
 
 	Exp_stat() {
@@ -191,6 +195,7 @@ public:
 		io_access_obs=0.0;
 		page_faults = 0.0;
 		qArea=0.0;
+		totalNumberOfPRetrieved=0.0;
 		
 	}
 	;
@@ -1933,13 +1938,16 @@ void print_output(char *s1, Exp_stat *e) {
 	}
 
 	fprintf(outputFile1,
-			"k = %d\tgrp size =%d\tQuery Area = %lf\ttime = %.5lf sec\tio_access_rtree=%.5lf\tio_access_rtree_obs=%.5lf\n",
+			"k = %d\tgrp size =%d\tQuery Area = %lf\ttime = %.5lf sec\tio_access_rtree=%.5lf\tio_access_rtree_obs=%.5lf\tp=%d\tVis=%.5lf sec\tSP=%.5lf sec\n",
 			e->k,
 			e->grpsize, 
 			e->qArea,
 			e->stime_sec / (1.0 * CLOCKS_PER_SEC * SAMPLE),
 			e->io_access,
-			e->io_access_obs
+			e->io_access_obs,
+			e->totalNumberOfPRetrieved,
+			e->visGraphConstime_sec/ (1.0 * CLOCKS_PER_SEC * SAMPLE),
+			e->shortestPathCalctime_sec/ (1.0 * CLOCKS_PER_SEC * SAMPLE)
 );
 	//for(int j=0; j<g; j++)
 	//fprintf(outputFile2,"%d\t%.5lf\n", j, e->cnum_retrievals[j]/SAMPLE);
@@ -2133,6 +2141,9 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	sum_e->io_access = rt->io_access;
 	sum_e->io_access_obs = rt_obs->io_access;
 	sum_e->qArea=qArea;
+	sum_e->totalNumberOfPRetrieved=ognn_gnn->totalNumberOfPRetrieved,
+	sum_e->visGraphConstime_sec=ognn_gnn->visGraphConsTime;
+	sum_e->shortestPathCalctime_sec=ognn_gnn->shortestPathCalcTime;
 //	sum_e->page_faults += cache->page_faults - last_pf;
 
 
@@ -2236,7 +2247,7 @@ void exp_ognn_varyQueryArea(){
 	char* str = "Result/Input/queryArea/vary_qa_";
 	int groupSize = 8;
 	
-	for (int queryArea = 2; queryArea <= 10; queryArea = queryArea+2 ) {
+	for (int queryArea = 2; queryArea <= 2; queryArea = queryArea+2 ) {
 		float qArea=(float)(queryArea)/(float)(1000);
 		char dest[120];
 		strcpy( dest, str );
@@ -2244,7 +2255,7 @@ void exp_ognn_varyQueryArea(){
 		sprintf(integer_string, "%d", queryArea);
 		strcat( dest, integer_string );
 		strcat( dest, "_g_8_k_4.txt" );
-		for(int algo=1;algo<5;algo++){
+		for(int algo=3;algo<5;algo++){
 			FILE *input1;
 			//input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
 			input1 = fopen( dest, "r");
@@ -2266,7 +2277,7 @@ void exp_ognn_varyQueryArea(){
 				RTree *srt = new RTree(TREEFILE,  cache);
 				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
 				printf("\n------------Query Area %lf,  Group Size %d , k = %d , Algo Num = %d  ----------\n",qArea,groupSize,k,algo);
-				//exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
+				exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
 				delete cache;
 				delete srt;
 				delete cache_obs;
@@ -2334,7 +2345,7 @@ int main(int argc, char* argv[]) {
 	Cache *cache = new Cache(0, blocksize);
 	//normalizeMyRealDataset();
 	//generateIntersectFreePoints();
-	generate_nonIntersectingQueryPoints();
+	//generate_nonIntersectingQueryPoints();
 
 
 	//Create sample input file
@@ -2473,7 +2484,7 @@ int main(int argc, char* argv[]) {
 	res_list->print();
 */
 	//exp_ognn_varyk();
-	exp_ognn_varyGroupSize();
+	//exp_ognn_varyGroupSize();
 	exp_ognn_varyQueryArea();
 
 

@@ -29,6 +29,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		RTree* rt_dataPoints,int function) {
 
 	totalNumberOfPRetrieved=0.0;
+	
 	//printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
@@ -45,7 +46,12 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	ObstructedDistance* obstructedDistance= new ObstructedDistance();
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
-	obstructedDistance->constructInitialVisGraph(initialVisGraph);
+	Clock sw1;
+	sw1.start();
+	obstructedDistance->constructInitialVisGraph(initialVisGraph);		
+	sw1.stop();
+	visGraphConsTime+=sw1.getDiff();
+
 
 		//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,egnn_sorted;
@@ -119,6 +125,8 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	}
 	print(egnn_sorted,ognn_sorted,k);
 	*/
+	visGraphConsTime+=obstructedDistance->visGraphConsTime;
+	shortestPathCalcTime+=obstructedDistance->shortestPathCalcTime;
 
 	delete kNN_point;
 	delete obstructedDistance;
@@ -147,7 +155,11 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	ObstructedDistance* obstructedDistance= new ObstructedDistance();
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
+	Clock sw1;
+	sw1.start();
 	obstructedDistance->constructInitialVisGraph(initialVisGraph);
+	sw1.stop();
+	visGraphConsTime+=sw1.getDiff();
 
 		//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,enn_centroid_sorted;
@@ -206,7 +218,8 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		fclose(outputFile1);
 		print(enn_centroid_sorted,ognn_sorted,k);*/
 
-
+	visGraphConsTime+=obstructedDistance->visGraphConsTime;
+	shortestPathCalcTime+=obstructedDistance->shortestPathCalcTime;
 	delete kNN_point;
 	delete obstructedDistance;
 	delete initialVisGraph;
@@ -235,7 +248,11 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	ObstructedDistance* obstructedDistance= new ObstructedDistance();
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
+	Clock sw1;
+	sw1.start();
 	obstructedDistance->constructInitialVisGraph(initialVisGraph);
+	sw1.stop();
+	visGraphConsTime+=sw1.getDiff();
 
 		//This vector will store the obstructed group NN
 	std::vector < MyStruct > ognn_sorted,enn_centroid_sorted;
@@ -296,7 +313,8 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		fclose(outputFile1);
 		print(enn_centroid_sorted,ognn_sorted,k);*/
 
-
+	visGraphConsTime+=obstructedDistance->visGraphConsTime;
+	shortestPathCalcTime+=obstructedDistance->shortestPathCalcTime;
 	delete kNN_point;
 	delete obstructedDistance;
 	delete initialVisGraph;

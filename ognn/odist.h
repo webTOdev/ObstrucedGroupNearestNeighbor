@@ -52,6 +52,14 @@ public:
 	void writeQueryPointsInFile(Point2D queryPoints[],int numOfQueryPoints);
 	void addDataPointInVG(VisibilityGraph* initialVisGraph,float* q);
 
+	long double visGraphConsTime;
+	long double shortestPathCalcTime;
+
+	ObstructedDistance(){
+		visGraphConsTime=0.0;
+		shortestPathCalcTime=0.0;
+	}
+
 };
 
 

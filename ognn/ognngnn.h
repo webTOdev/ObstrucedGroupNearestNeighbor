@@ -25,6 +25,8 @@ public:
 	void ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
 		RTree* rt_dataPoints,int function);
 	int totalNumberOfPRetrieved;
+	long double visGraphConsTime;
+	long shortestPathCalcTime;
 	
 };
 
