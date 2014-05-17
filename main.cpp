@@ -1979,6 +1979,7 @@ void generate_points_inside_rectangle_with_point(float r_x,float r_y,float lengt
 			m[2] = r_y - width / 2;
 			m[3] = r_y + width / 2;
 			int count=0;
+			int group=15;
 
 			while(1){
 
@@ -1990,9 +1991,12 @@ void generate_points_inside_rectangle_with_point(float r_x,float r_y,float lengt
 					//printf("%lf %lf\n",x,y);
 					FILE *input1,*input2,*input3;
 					input1 = fopen( "Datasets/sample_mbr.txt", "r");
-					input2 = fopen( "Results/Input/k/vary_k_g_4_qa_005.txt", "a");
+					//input2 = fopen( "Result/Input/queryArea/vary_g_8_k_4_qa_01.txt", "a");
+					input2 = fopen( "Result/Input/groupSize/vary_g_16_n_k_4_qa_005.txt", "a");
+
+					
 					bool intersect=false;
-					for(int j=0; j<22070; j++)
+					for(int j=0; j<34334; j++)
 					{				
 						fscanf(input1,"%d%f%f%f%f",&id,&r2[0],&r2[1],&r2[2],&r2[3]);
 						//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
@@ -2006,7 +2010,7 @@ void generate_points_inside_rectangle_with_point(float r_x,float r_y,float lengt
 					}
 					if(intersect == false){
 						fprintf(input2,"%ld %lf %lf\n",total,x,y);
-						if(count==3){
+						if(count==group){
 							fclose(input2);
 							fclose(input1);
 							break;
@@ -2024,8 +2028,9 @@ void generate_points_inside_rectangle_with_point(float r_x,float r_y,float lengt
 
 void generate_nonIntersectingQueryPoints(){
 	float defaultQArea=.005,r_x,r_y;float length=MAXX*defaultQArea,width=MAXY*defaultQArea;
-	srand(1000);
-	for(int i=0;i<100;i++){
+	srand(10000);
+	int count=0;
+	for(int i=0;i<1000;i++){
 			//float x = (float)rand()/RAND_MAX*MAXX*0.005;
 			//float y = (float)rand()/RAND_MAX*MAXY*.005;
 			
@@ -2036,34 +2041,37 @@ void generate_nonIntersectingQueryPoints(){
 				continue;
 			if ((r_y - width / 2) < 0 || (r_y + width / 2) > MAXY)
 				continue;
+			float r1[4],r2[4];
+			r1[0]=r_x;r1[1]=r_x;r1[2]=r_y;r1[3]=r_y;
+			bool intersect=false;int id;
 
-			generate_points_inside_rectangle_with_point(r_x,r_y,length,width);
-		//queryPoints[i][0]=x;
-		//queryPoints[i][1]=y;
+			FILE *input1;
+			input1 = fopen( "Datasets/sample_mbr.txt", "r");
+					
+			for(int j=0; j<34334; j++)
+			{				
+						fscanf(input1,"%d%f%f%f%f",&id,&r2[0],&r2[1],&r2[2],&r2[3]);
+						//printf("j %f,%f,%f,%f",r2[0],r2[1],r2[2],r2[3]);
+						//cout<<"\nIntersect? "<<intersects(r1,r2)<<" i= "<<i<<" j= "<<j<<endl;
+						if(intersects(r1,r2))
+						{
+							intersect=true;
+							break;
+						}					
+					
+			}
+			fclose(input1);
+			if(intersect)
+				continue;
+			else{
+					generate_points_inside_rectangle_with_point(r_x,r_y,length,width);
+					if(count==100)
+						break;
+					count++;
+				}
 	}
 }
 
-void generate_queryPoints(Point2D queryPoints[],int numOfQueryPoints){
-	float defaultQArea=.005,r_x,r_y;float length=50,width=50;
-	for(int i=0;i<numOfQueryPoints;i++){
-		for(int j=0;j<10;i++){
-			//float x = (float)rand()/RAND_MAX*MAXX*0.005;
-			//float y = (float)rand()/RAND_MAX*MAXY*.005;
-			srand(1000);
-			r_x = (float)rand()/RAND_MAX*10000;
-			r_y = (float)rand()/RAND_MAX*10000;
-				
-			if ((r_x - length / 2) < 0 || (r_x + length / 2) > MAXX)
-				continue;
-			if ((r_y - width / 2) < 0 || (r_y + width / 2) > MAXY)
-				continue;
-
-			generate_points_inside_rectangle_with_point(r_x,r_y,MAXX*.005,MAXY*.005);
-		}
-		//queryPoints[i][0]=x;
-		//queryPoints[i][1]=y;
-	}
-}
 void writeOutputInfile(int k,double kNearestNeighbor[][3],int groupSize,string s){
 	FILE * outputFile1;
 	outputFile1 = fopen("Result/ognnOutput", "a+");
@@ -2138,23 +2146,22 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	ognn_gnn->ognnUsingEGNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 3
 	ognn_gnn->ognnMaxUsingNN(queryPoints,3,4,kNearestNeighbor, rt_obs,rt,1); Algo 4*/
 void exp_ognn_varyk(){
-	float queryPoints[4][2];
-	int groupSize=4;
-	//generate_queryPoints(queryPoints,4);
+	float queryPoints[8][2];
+	int groupSize=8;
 	float qArea=0.005;
 	
 	for (int k = 4; k <= 64; k = k*2 ) {
 		for(int algo=1;algo<5;algo++){
 			FILE *input1;
-			input1 = fopen( "Result/Input/k/vary_k_g_4_qa_005.txt", "r");
-			for(int sample=0;sample<10;sample++){
+			input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
+			for(int sample=0;sample<1;sample++){
 				double kNearestNeighbor[64][3]; 
 				int blocksize = 1024;			//4096;//1024;//4096;
 				int b_length = 1024;
 				int dimension = 2;
 				
 			    int x;
-			    for(int i=0; i<4; i++)
+			    for(int i=0; i<groupSize; i++)
 			    {
 			        fscanf(input1,"%ld%f%f",&x,&queryPoints[i][0],&queryPoints[i][1]);
 				}
@@ -2175,6 +2182,102 @@ void exp_ognn_varyk(){
 		}
 	}
 }
+
+void exp_ognn_varyGroupSize(){
+	float queryPoints[64][2];
+	float qArea=0.005;
+	int k=4;
+	char* str = "Result/Input/groupSize/vary_g_";
+	
+	for (int groupSize = 8; groupSize <= 64; groupSize = groupSize*2 ) {
+		char dest[120];
+		strcpy( dest, str );
+		char integer_string[10];
+		sprintf(integer_string, "%d", groupSize);
+		strcat( dest, integer_string );
+		strcat( dest, "_k_4_qa_005.txt" );
+		for(int algo=1;algo<5;algo++){
+			FILE *input1;
+			//input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
+			input1 = fopen( dest, "r");
+			for(int sample=0;sample<2;sample++){
+				double kNearestNeighbor[64][3]; 
+				int blocksize = 1024;			//4096;//1024;//4096;
+				int b_length = 1024;
+				int dimension = 2;
+				
+			    int x;
+			    for(int i=0; i<groupSize; i++)
+			    {
+			        fscanf(input1,"%ld%f%f",&x,&queryPoints[i][0],&queryPoints[i][1]);
+				}
+
+				Cache *cache = new Cache(0, blocksize);
+				Cache *cache_obs = new Cache(0,blocksize);
+
+				RTree *srt = new RTree(TREEFILE,  cache);
+				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+				printf("\n------------  Group Size %d , k = %d , Algo Num = %d  ----------\n",groupSize,k,algo);
+				exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
+				delete cache;
+				delete srt;
+				delete cache_obs;
+				delete srt_obs;
+			}
+			fclose(input1);
+		}
+	}
+}
+
+void exp_ognn_varyQueryArea(){
+	float queryPoints[8][2];
+	
+	int k=4;
+	char* str = "Result/Input/queryArea/vary_qa_";
+	int groupSize = 8;
+	
+	for (int queryArea = 2; queryArea <= 10; queryArea = queryArea+2 ) {
+		float qArea=(float)(queryArea)/(float)(1000);
+		char dest[120];
+		strcpy( dest, str );
+		char integer_string[10];
+		sprintf(integer_string, "%d", queryArea);
+		strcat( dest, integer_string );
+		strcat( dest, "_g_8_k_4.txt" );
+		for(int algo=1;algo<5;algo++){
+			FILE *input1;
+			//input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
+			input1 = fopen( dest, "r");
+			for(int sample=0;sample<1;sample++){
+				double kNearestNeighbor[64][3]; 
+				int blocksize = 1024;			//4096;//1024;//4096;
+				int b_length = 1024;
+				int dimension = 2;
+				
+			    int x;
+			    for(int i=0; i<groupSize; i++)
+			    {
+			        fscanf(input1,"%ld%f%f",&x,&queryPoints[i][0],&queryPoints[i][1]);
+				}
+
+				Cache *cache = new Cache(0, blocksize);
+				Cache *cache_obs = new Cache(0,blocksize);
+
+				RTree *srt = new RTree(TREEFILE,  cache);
+				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+				printf("\n------------Query Area %lf,  Group Size %d , k = %d , Algo Num = %d  ----------\n",qArea,groupSize,k,algo);
+				//exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
+				delete cache;
+				delete srt;
+				delete cache_obs;
+				delete srt_obs;
+			}
+			fclose(input1);
+		}
+	}
+}
+
+
 
 
 float val(float oldVal,float min,float max){
@@ -2231,6 +2334,7 @@ int main(int argc, char* argv[]) {
 	Cache *cache = new Cache(0, blocksize);
 	//normalizeMyRealDataset();
 	//generateIntersectFreePoints();
+	generate_nonIntersectingQueryPoints();
 
 
 	//Create sample input file
@@ -2368,7 +2472,10 @@ int main(int argc, char* argv[]) {
 	srt_obs->rangeQuery(mbr, res_list);
 	res_list->print();
 */
-	exp_ognn_varyk();
+	//exp_ognn_varyk();
+	exp_ognn_varyGroupSize();
+	exp_ognn_varyQueryArea();
+
 
 	//delete cache;
 //	delete srt;
