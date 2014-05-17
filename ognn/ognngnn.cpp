@@ -28,10 +28,12 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
 		RTree* rt_dataPoints,int function) {
 
+	totalNumberOfPRetrieved=0.0;
 	//printf("\n----------------------------------------Searching for k-GNN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(queryPoints, k, kNearestNeighbor,numOfQueryPoints,function);
+	totalNumberOfPRetrieved+=k;
 	
 	/*printf("\nk- Group Nearest Neighbor of (%f,%f),(%f,%f),(%f,%f) is ", queryPoints[0][0],queryPoints[0][1],
 			queryPoints[1][0],queryPoints[1][1],queryPoints[2][0],queryPoints[2][1]);
@@ -76,6 +78,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
 			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints,function);
+			totalNumberOfPRetrieved++;
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];
 			kNN_point[2]=nearestNeighbor[2];
@@ -127,13 +130,14 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
 		RTree* rt_dataPoints,int function) {
 
+	totalNumberOfPRetrieved=0.0;
 	float centroid[1][2];
 	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
 	//printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(centroid, k, kNearestNeighbor,1,function);
-	
+	totalNumberOfPRetrieved+=k;
 	/*printf("\nk- Nearest Neighbor of centroid (%f,%f)is ", centroid[0][0],centroid[0][1]);
 	for(int index=0;index<k;index++){
 		printf("(%f,%f) dist %lf\t", kNearestNeighbor[index][0], kNearestNeighbor[index][1],kNearestNeighbor[index][2]);
@@ -177,6 +181,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
 			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1,function);
+			totalNumberOfPRetrieved++;
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];
 			kNN_point[2]=nearestNeighbor[2];
@@ -212,12 +217,14 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
 		RTree* rt_dataPoints,int function) {
 
+	totalNumberOfPRetrieved=0.0;
 	float centroid[1][2];
 	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
 	//printf("\n----------------------------------------Searching for k-NN---------------------------------------\n");
 	
 	//kNearestNeighbour holds the kGNN Euclidean
 	rt_dataPoints->Point_BFN_kGNNQ(centroid, k, kNearestNeighbor,1,function);
+	totalNumberOfPRetrieved+=k;
 	
 	//printf("\nk- Nearest Neighbor of centroid (%f,%f)is ", centroid[0][0],centroid[0][1]);
 	/*for(int index=0;index<k;index++){
@@ -262,6 +269,7 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
 			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1,function);
+			totalNumberOfPRetrieved++;
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];
 			kNN_point[2]=nearestNeighbor[2];
