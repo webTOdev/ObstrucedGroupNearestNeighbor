@@ -28,6 +28,7 @@
 #include "ognn/ognn.h"
 #include "ognn/odist.h"
 #include "ognn/ognngnn.h"
+#include "ognn/odistcentroid.h"
 
 //Added by Tanzima
 //#include "global.h"
@@ -2358,15 +2359,15 @@ int main(int argc, char* argv[]) {
 	//RTree *srt = new RTree(TREEFILE,  cache);
 	//srt->print_tree();
 
-	//Cache *cache_obs = new Cache(0,blocksize);
+	Cache *cache_obs = new Cache(0,blocksize);
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
 	//RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
 	//rt_obs->print_tree();
 	//range_test(rt_obs);
 	//delete rt_obs;
 
-	//RTree *srt = new RTree(TREEFILE,  cache);
-	//RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	RTree *srt = new RTree(TREEFILE,  cache);
+	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
 	//srt_obs->print_tree();
 	//srt->print_tree();
 
@@ -2392,12 +2393,12 @@ int main(int argc, char* argv[]) {
 	printf("\n%lf %lf %lf %lf %lf",obstacle[0],obstacle[1],obstacle[2],obstacle[3],obstacle[4]);
 */
 
-	//float m[2];
+	float m[2];
 	/*m[0]=415171 ;
 	m[1]=4543907;*/
 
-	//m[0]=2;
-	//m[1]=2;
+	m[0]=2;
+	m[1]=2;
 
 	double nearestNeighbor[5];
 
@@ -2424,12 +2425,19 @@ int main(int argc, char* argv[]) {
 	queryPoints[2][0] = 501774;
 	queryPoints[2][1] = 4581595;*/
 
-	/*queryPoints[0][0] = 10;
+	float queryPoints[3][2];
+	queryPoints[0][0] = 10;
 	queryPoints[0][1] = 10;
 	queryPoints[1][0] = 11;
 	queryPoints[1][1] = 11;
 	queryPoints[2][0] = 8;
-	queryPoints[2][1] = 8;*/
+	queryPoints[2][1] = 8;
+
+	ObstructedDistanceCentroid* oDist = new ObstructedDistanceCentroid();
+	VisibilityGraph* initialVisGraph = new VisibilityGraph();
+	oDist->writeQueryPointsInFile(queryPoints,3);
+	oDist->constructInitialVisGraph(initialVisGraph);
+	oDist->computeAggObstructedDistance(initialVisGraph,m,queryPoints,3,srt_obs,0);
 
 
 	/*ObstructedDistance* oDist = new ObstructedDistance();
@@ -2485,7 +2493,7 @@ int main(int argc, char* argv[]) {
 */
 	//exp_ognn_varyk();
 	//exp_ognn_varyGroupSize();
-	exp_ognn_varyQueryArea();
+	//exp_ognn_varyQueryArea();
 
 
 	//delete cache;

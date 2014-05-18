@@ -9,6 +9,7 @@
 #define OGNN_UTILITY_H_
 
 double getDistanceBetweenTwoPoints(Point2D p,Point2D q);
+void centroidOfQ(Point2D queryPoints[], int numOfQueryPoints, Point2D centroid[]);
 //Use this struct to store the distance between p and q against the q
 struct MyStruct
 {
@@ -41,5 +42,36 @@ struct MyShortestPath
     float* queryPoints;
 
 	MyShortestPath(vector<int> sp , float* q) { shortestPath = sp; queryPoints =  q ;}
+};
+class Clock {
+
+public:
+	void start() {
+		c1 = clock();
+		t1 = time(0);
+	}
+	;
+	void stop() {
+		c2 = clock();
+		t2 = time(0);
+	}
+	;
+	int getDiff() {
+		return (c2 - c1);
+	}
+	;
+
+private:
+	time_t t1, t2;
+	clock_t c1, c2;
+};
+
+
+struct MyVertexStruct
+{
+    double distance;
+    Point* vertex;
+
+	MyVertexStruct(double d , Point* p) { distance = d; vertex =  p ;}
 };
 #endif /* OGNN_UTILITY_H_ */

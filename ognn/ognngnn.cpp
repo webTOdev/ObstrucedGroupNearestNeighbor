@@ -22,7 +22,6 @@
 
 //VisibilityGraphController* vg;
 void print(std::vector < MyStruct >& ognn_sorted,std::vector < MyStruct >& egnn_sorted,int k);
-void centroidOfQ(Point2D queryPoints[], int numOfQueryPoints, Point2D centroid[]);
 
 void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		int k, double kNearestNeighbor[][3], RTree* rt_obstacle,
@@ -321,17 +320,6 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	delete rt_dataPoints->kGNNHeap;
 }
 
-void centroidOfQ(Point2D queryPoints[], int numOfQueryPoints, Point2D centroid[]){
-	float x=0.0;
-	float y=0.0;
-	for(int i=0;i<numOfQueryPoints;i++){
-		x+=queryPoints[i][0];
-		y+=queryPoints[i][1];
-	}
-	centroid[0][0]=x/numOfQueryPoints;
-	centroid[0][1]=y/numOfQueryPoints;
-
-}
 
 void print(std::vector < MyStruct >& egnn_sorted,std::vector < MyStruct >& ognn_sorted,int k){
 	float* q;

@@ -16,5 +16,17 @@ double getDistanceBetweenTwoPoints(Point2D p,Point2D q){
 	return dist;
 }
 
+void centroidOfQ(Point2D queryPoints[], int numOfQueryPoints, Point2D centroid[]){
+	float x=0.0;
+	float y=0.0;
+	for(int i=0;i<numOfQueryPoints;i++){
+		x+=queryPoints[i][0];
+		y+=queryPoints[i][1];
+	}
+	centroid[0][0]=x/numOfQueryPoints;
+	centroid[0][1]=y/numOfQueryPoints;
+
+}
+
 
 

@@ -26,6 +26,9 @@ const int infinity = 1000000000;
 class ObstructedDistance
 {
 public:
+	char *VISGRAPH_FILE ;
+	VisibilityGraphController* vgController;
+	vector<string> obstacleList;
 	//function=0 sum , function=1 max
 	double computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
 		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function);
@@ -58,6 +61,7 @@ public:
 	ObstructedDistance(){
 		visGraphConsTime=0.0;
 		shortestPathCalcTime=0.0;
+		VISGRAPH_FILE = "Datasets/visibilityGraphPolygons.txt";
 	}
 
 };

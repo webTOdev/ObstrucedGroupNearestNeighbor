@@ -2,10 +2,6 @@
 
 using namespace std;
 
-char *VISGRAPH_FILE = "Datasets/visibilityGraphPolygons.txt";
-VisibilityGraphController* vgController;
-vector<string> obstacleList;
-
 //Checks whether the line and obstacle intersect
 bool ObstructedDistance::doesLineAndObstcaleIntersects(tLinestring ls,tPolygon p){
 	std::vector<turn_info> turns;
