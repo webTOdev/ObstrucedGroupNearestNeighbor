@@ -21,6 +21,23 @@ double calculateInitializeThreshold(Point2D centroid[],float* p, Point2D queryPo
 	}
 	return max;
 }
+
+double calculateThreshold(Point2D centroid[],float* p, Point2D queryPoints[],int numOfQueryPoints,std::vector<MyStruct>& dist_O_p_qi){
+	double max=0.0;
+	float q[2],c[2];
+	c[0]=centroid[0][0];
+	c[1]=centroid[0][1];
+	for(int i=0;i<numOfQueryPoints;i++){
+		q[0] = queryPoints[i][0];
+		q[1] = queryPoints[i][1];	
+		double euclideanDist_c_qi = getDistanceBetweenTwoPoints(c, q);
+		double obsDist_p_qi = dist_O_p_qi[i].distance;	
+		if(max<(euclideanDist_c_qi+obsDist_p_qi)){
+			max=euclideanDist_c_qi+obsDist_p_qi;
+		}
+	}
+	return max;
+}
 void ObstructedDistanceCentroid::initialize(std::vector<MyStruct>& dist_O_p_qi,Point2D queryPoints[],int numOfQueryPoints){
 	float *q;
 	L_R.resize(numOfQueryPoints);
@@ -120,6 +137,8 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	double* extraObs = new double[5];
 	bool firstIteration=true;
 	bool condition=false;
+	bool pAdded=false;
+	vector<int> shortestPath;
 	do{
 		
 		while(1){
@@ -174,13 +193,59 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 			bool realDistanceFound = isRealDistanceFor_qFound(q,p,dist_O_p_qi,threshold,i);
 			if(realDistanceFound)
 				continue;
-			else{
+			else{				
 				addVerticesOfObsInRangeInLc(obsInRange,initialVisGraph,i);
+				if(!pAdded){
+					sw1.start();
+					addDataPointInVG(initialVisGraph,p);
+					sw1.stop();
+					visGraphConsTime+=sw1.getDiff();
+				}
+				pAdded=true;
 			}
-			int cVertex=-1;
 			Point* vertex;
 			double dist_O_v_q=infinty;
-			for(int j=0;j<L_N[i].size();j++){
+			vector < Point* >::iterator it = L_N[i].begin();
+			while(it != L_N[i].end()) {
+				vertex=(Point*)(*it);
+				bool intersect=false;
+				vector<Line*> adjacentEdges=initialVisGraph->findEdgesWithThisPoint(vertex);
+				for(int k=0;k<obsInRange.size();k++){
+					tPolygon poly=createPolygon(obsInRange[k]);
+					for(int l=0;l<adjacentEdges.size();l++){
+						Line* line=adjacentEdges[l];
+						tLinestring lineS=createLS(line->a->x,line->a->y,line->b->x,line->b->y);
+						intersect = doesLineAndObstcaleIntersects(lineS,poly);
+						if(intersect) break;
+					}
+					if(intersect) break;
+
+				}
+				if(intersect) {
+					L_N[i].erase(it);
+					L_C[i].push_back(vertex);
+				}
+				else{
+					vector<int> shortestPath;
+					float *nVertex=new float[2];
+					nVertex[0]=vertex->x;
+					nVertex[1]=vertex->y;
+					dist_O_v_q=computeObstructedDistance(initialVisGraph,nVertex,q,shortestPath);
+					if(dist_O_v_q <= threshold){
+						L_N[i].erase(it);
+						
+						L_R[i].push_back(MyStruct(dist_O_v_q,nVertex));
+					}else
+					{
+						L_N[i].erase(it);
+						L_C[i].push_back(vertex);
+					}
+				}
+				++it; // ++i is usually faster than i++. It's a good habit to use it.
+
+			}
+
+		/*	for(int j=0;j<L_N[i].size();j++){
 				vertex=L_N[i][j];
 				bool intersect=false;
 				vector<Line*> adjacentEdges=initialVisGraph->findEdgesWithThisPoint(vertex);
@@ -220,13 +285,12 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 						L_N[i].erase(L_N[i].begin()+cVertex);
 						L_C[i].push_back(vertex);
 					}
-			}
+			}*/
 			for(int j=0;j<L_C[i].size();j++){
 				Point* mPoint=L_C[i][j];	
-				vector<int> shortestPath;
 				float *mVertex=new float[2];
 				mVertex[0]=mPoint->x;
-				mVertex[0]=mPoint->y;
+				mVertex[1]=mPoint->y;
 				dist_O_v_q=computeObstructedDistance(initialVisGraph,mVertex,q,shortestPath);
 				if(dist_O_v_q <= threshold){						
 					L_R[i].push_back(MyStruct(dist_O_v_q,mVertex));
@@ -236,10 +300,12 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 				}
 			}
 			L_C[i].clear();
+			dist_O_v_q=computeObstructedDistance(initialVisGraph,p,q,shortestPath);
+			replaceObsDist(dist_O_p_qi,q,dist_O_v_q);
 		}
 	}
 
-
+	threshold=calculateThreshold(centroid,p,queryPoints,numOfQueryPoints,dist_O_p_qi);
 	condition=findTerminationCondition(dist_O_p_qi,queryPoints,numOfQueryPoints,threshold);
 	obsInRange.clear();
 	}while(condition);
@@ -255,6 +321,12 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 		dist_OG=dist_O_p_qi[0].distance;
 	}
 
+	if(pAdded){
+		sw1.start();
+		removeDataPointFromVG(initialVisGraph,p);
+		sw1.stop();
+		visGraphConsTime+=sw1.getDiff();
+	}
 	//delete q;
 	//delete v;
 	delete extraObs;
@@ -292,6 +364,32 @@ double ObstructedDistanceCentroid::computeObstructedDistance(VisibilityGraph* in
 	return shortestPathDistance;
 }
 
+void ObstructedDistanceCentroid::replaceObsDist(std::vector < MyStruct >& dist_O_p_qi,float* q,double obsDist){
+	for(int j=0;j<dist_O_p_qi.size();j++){
+			if(dist_O_p_qi[j].queryPoints[0]==q[0] && dist_O_p_qi[j].queryPoints[1]==q[1]){
+				dist_O_p_qi[j].distance=obsDist;
+			}
+	}
+}
+
+void ObstructedDistanceCentroid::removeDataPointFromVG(VisibilityGraph* initialVisGraph,float* q){
+
+	char buffer[1024];
+	_snprintf(buffer, sizeof(buffer),
+				"%s%f %f,%f %f%s", "polygon((",
+				q[0],q[1], q[0],q[1], "))");
+	initialVisGraph = vgController->removeDataPointFromVisGraph(initialVisGraph,initialVisGraph->searchObsWithString(buffer));
+}
+void ObstructedDistanceCentroid::addDataPointInVG(VisibilityGraph* initialVisGraph,float* q){
+
+	char buffer[1024];
+	_snprintf(buffer, sizeof(buffer),
+				"%s%f %f,%f %f%s", "polygon((",
+				q[0],q[1], q[0],q[1], "))");
+	Obstacle* obs = createObstacle(buffer);
+	initialVisGraph = vgController->addNewObstacleForIncrementalVisGraph(initialVisGraph, obs);
+	obstacleList.push_back(buffer);
+}
 int ObstructedDistanceCentroid::drawAndWriteFileVisEdges(vector<Line*> visEdges) {
 	//Remove existing test.txt file
 	if (remove("test.txt") != 0)

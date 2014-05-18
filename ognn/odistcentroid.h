@@ -51,6 +51,9 @@ public:
 	void addVerticesOfObsInRangeInLc(vector<string>& obsInRange,VisibilityGraph* initialVisGraph,int q_index);
 	double computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p, float* q,vector<int>& shortestPath);
 	int drawAndWriteFileVisEdges(vector<Line*> visEdges);
+	void removeDataPointFromVG(VisibilityGraph* initialVisGraph,float* q);
+	void addDataPointInVG(VisibilityGraph* initialVisGraph,float* q);
+	void ObstructedDistanceCentroid::replaceObsDist(std::vector < MyStruct >& dist_O_p_qi,float* q,double obsDist);
 
 
 	ObstructedDistanceCentroid(){

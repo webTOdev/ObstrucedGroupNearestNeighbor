@@ -2437,7 +2437,7 @@ int main(int argc, char* argv[]) {
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	oDist->writeQueryPointsInFile(queryPoints,3);
 	oDist->constructInitialVisGraph(initialVisGraph);
-	oDist->computeAggObstructedDistance(initialVisGraph,m,queryPoints,3,srt_obs,0);
+	double obsDist = oDist->computeAggObstructedDistance(initialVisGraph,m,queryPoints,3,srt_obs,0);
 
 
 	/*ObstructedDistance* oDist = new ObstructedDistance();
