@@ -61,6 +61,13 @@ bool ObstructedDistanceCentroid::visGraphContainsPoly(char buffer[1024]) {
 
 	return false;
 }
+tPolygon createPolygon(string buffer){
+	tPolygon poly;
+
+	bg::read_wkt(buffer.c_str(),poly);
+	bg::correct(poly);
+	return poly;
+}
 
 void ObstructedDistanceCentroid::addNewObstacleInVisGraph(double* obs,VisibilityGraph* initialVisGraph){
 	char buffer[1024];
@@ -162,15 +169,73 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 					double dist_o_v_q=L_R[i][j].distance;
 					relax(v,q,p,initialVisGraph,dist_O_p_qi,dist_o_v_q);
 				}
-				//Check we have found already found the real distance between q_i and p
-				bool realDistanceFound = isRealDistanceFor_qFound(q,p,dist_O_p_qi,threshold,i);
-				if(realDistanceFound)
-					continue;
-				else{
-					addVerticesOfObsInRangeInLc(obsInRange,initialVisGraph,i);
+			}
+			//Check we have found already found the real distance between q_i and p
+			bool realDistanceFound = isRealDistanceFor_qFound(q,p,dist_O_p_qi,threshold,i);
+			if(realDistanceFound)
+				continue;
+			else{
+				addVerticesOfObsInRangeInLc(obsInRange,initialVisGraph,i);
+			}
+			int cVertex=-1;
+			Point* vertex;
+			double dist_O_v_q=infinty;
+			for(int j=0;j<L_N[i].size();j++){
+				vertex=L_N[i][j];
+				bool intersect=false;
+				vector<Line*> adjacentEdges=initialVisGraph->findEdgesWithThisPoint(vertex);
+				for(int k=0;k<obsInRange.size();k++){
+					tPolygon poly=createPolygon(obsInRange[k]);
+					for(int l=0;l<adjacentEdges.size();l++){
+						Line* line=adjacentEdges[l];
+						tLinestring lineS=createLS(line->a->x,line->a->y,line->b->x,line->b->y);
+						intersect = doesLineAndObstcaleIntersects(lineS,poly);
+						if(intersect) break;
+					}
+					if(intersect) break;
+
+				}
+				if(intersect) {
+					cVertex=j;
+					break;
 				}
 
 			}
+			if(cVertex!=-1){
+				L_N[i].erase(L_N[i].begin()+cVertex);
+				L_C[i].push_back(vertex);
+			}
+			else{
+					vector<int> shortestPath;
+					float *nVertex=new float[2];
+					nVertex[0]=vertex->x;
+					nVertex[0]=vertex->y;
+					dist_O_v_q=computeObstructedDistance(initialVisGraph,nVertex,q,shortestPath);
+					if(dist_O_v_q <= threshold){
+						L_N[i].erase(L_N[i].begin()+cVertex);
+						
+						L_R[i].push_back(MyStruct(dist_O_v_q,nVertex));
+					}else
+					{
+						L_N[i].erase(L_N[i].begin()+cVertex);
+						L_C[i].push_back(vertex);
+					}
+			}
+			for(int j=0;j<L_C[i].size();j++){
+				Point* mPoint=L_C[i][j];	
+				vector<int> shortestPath;
+				float *mVertex=new float[2];
+				mVertex[0]=mPoint->x;
+				mVertex[0]=mPoint->y;
+				dist_O_v_q=computeObstructedDistance(initialVisGraph,mVertex,q,shortestPath);
+				if(dist_O_v_q <= threshold){						
+					L_R[i].push_back(MyStruct(dist_O_v_q,mVertex));
+				}else
+				{
+					L_N[i].push_back(mPoint);
+				}
+			}
+			L_C[i].clear();
 		}
 	}
 
@@ -205,6 +270,50 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	
 
 	return dist_OG;
+}
+
+double ObstructedDistanceCentroid::computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p, float* q,vector<int>& shortestPath) {
+	int maxVertexNum = drawAndWriteFileVisEdges(initialVisGraph->edges);
+	double shortestPathDistance = initialVisGraph->findShortestPath(p[0], p[1],
+			q[0], q[1],maxVertexNum,shortestPath);
+	/*int i = 0;
+	//Print the Shortest Path
+	printf("--------The Shortest Path is :");
+	while (i<shortestPath.size()) {
+		printf("%d ", shortestPath[i]);
+		i++;
+	}
+	//printf("\nObstructed Distance found is %lf\n", shortestPathDistance);
+	*/
+	if(shortestPathDistance==infinty){
+		return infinty;
+	}
+
+	return shortestPathDistance;
+}
+
+int ObstructedDistanceCentroid::drawAndWriteFileVisEdges(vector<Line*> visEdges) {
+	//Remove existing test.txt file
+	if (remove("test.txt") != 0)
+		perror("Error deleting file");
+	//else
+		//puts("File successfully deleted");
+	/*FILE *fp;
+	fp=fopen("test.txt", "w");
+	fclose(fp);
+*/
+	//Dijkstra algorithm needs to create a vector of size n , where n is the id of the vertex
+	int maxNumberOfVertex=-1;
+	for (int i = 0; i < visEdges.size(); i++) {
+		fileWrite(visEdges[i]->a, visEdges[i]->b);
+		if(visEdges[i]->a->id > maxNumberOfVertex){
+			maxNumberOfVertex=visEdges[i]->a->id;
+		}else
+			if(visEdges[i]->b->id > maxNumberOfVertex){
+			maxNumberOfVertex=visEdges[i]->b->id;
+		}
+	}
+	return maxNumberOfVertex+1;
 }
 
 void ObstructedDistanceCentroid::addVerticesOfObsInRangeInLc(vector<string>& obsInRange,VisibilityGraph* initialVisGraph,int q_index){

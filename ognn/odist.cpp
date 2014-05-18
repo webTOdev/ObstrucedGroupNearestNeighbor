@@ -327,8 +327,8 @@ int ObstructedDistance::drawAndWriteFileVisEdges(vector<Line*> visEdges) {
 	//Remove existing test.txt file
 	if (remove("test.txt") != 0)
 		perror("Error deleting file");
-	else
-		puts("File successfully deleted");
+	//else
+		//puts("File successfully deleted");
 	/*FILE *fp;
 	fp=fopen("test.txt", "w");
 	fclose(fp);

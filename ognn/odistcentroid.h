@@ -42,13 +42,15 @@ public:
 	void addNewObstacleInVisGraph(double* obs,VisibilityGraph* initialVisGraph);
 	void writeQueryPointsInFile(Point2D queryPoints[],int numOfQueryPoints);
 	void constructInitialVisGraph(VisibilityGraph* initialVisGraph) ;
-	void ObstructedDistanceCentroid::writePointInFile(float* p);
+	void writePointInFile(float* p);
 	bool doesLineAndObstcaleIntersects(tLinestring ls,tPolygon p);
 	tLinestring createLS(double x1,double y1, double x2, double y2);
 	bool isVisible(float *v,float* p,VisibilityGraph* initialVisGraph);
 	void relax(float *v,float *q,float* p,VisibilityGraph* initialVisGraph,std::vector<MyStruct>& dist_O_p_qi,double dist_o_v_q);
 	bool isRealDistanceFor_qFound(float* q,float* p,std::vector<MyStruct>& dist_O_p_qi,double threshold,int q_index);
 	void addVerticesOfObsInRangeInLc(vector<string>& obsInRange,VisibilityGraph* initialVisGraph,int q_index);
+	double computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p, float* q,vector<int>& shortestPath);
+	int drawAndWriteFileVisEdges(vector<Line*> visEdges);
 
 
 	ObstructedDistanceCentroid(){
