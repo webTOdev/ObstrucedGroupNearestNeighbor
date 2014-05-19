@@ -861,9 +861,9 @@ void RTree::Rectangle_BFN_NNQ(Point2D o, double *_rslt)
 	while (son != -1)
 	{
 		RTNode *rtn = new RTNode(this, son);
-		io_access++;
 		for (int i = 0; i < rtn -> num_entries; i ++)
 		{
+			io_access++;
 			float o1[2];
 			o1[0]=(float)o[0];
 			o1[1]=(float)o[1];
@@ -969,9 +969,10 @@ bool RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 		while (son != -1)
 		{
 			RTNode *rtn = new RTNode(this, son);
-			io_access++;
+			
 			for (int i = 0; i < rtn -> num_entries; i ++)
 			{
+			io_access++;
 			float o1[2];
 			o1[0]=(float)o[0];
 			o1[1]=(float)o[1];
@@ -1129,9 +1130,10 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryP
 	while (son != -1)
 	{
 		RTNode *rtn = new RTNode(this, son);
-		io_access++;
+		
 		for (int i = 0; i < rtn -> num_entries; i ++)
 		{
+			io_access++;
 			float o1[2];
 			float gnnMinDist=0;
 			//Find min Group distance
@@ -1262,9 +1264,10 @@ bool RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 		while (son != -1)
 		{
 			RTNode *rtn = new RTNode(this, son);
-			io_access++;
+			
 			for (int i = 0; i < rtn -> num_entries; i ++)
 			{
+				io_access++;
 				float o1[2];
 				float gnnMinDist=0;
 				//Find min Group distance

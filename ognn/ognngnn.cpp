@@ -44,8 +44,12 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
-	//ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	int obsAlgoNumber;
+	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;*/
 	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;
+	
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
 	sw1.start();
@@ -109,22 +113,22 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	
 	std::sort(egnn_sorted.begin(), egnn_sorted.end(), less_than_key());
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
-	if(function==0){
+	/*if(function==0){
 		printf("********************OGNN-GNN-SUM*******************************\n");
-	/*	FILE * outputFile1;
+		FILE * outputFile1;
 		outputFile1 = fopen("Result/ognnOutput", "a+");
 		fprintf(outputFile1,"\n********************OGNN-GNN-SUM*******************************\n");
-		fclose(outputFile1);*/
+		fclose(outputFile1);
 
 	}
 	if(function==1){
 		printf("********************OGNN-GNN-MAX*******************************\n");
-		/*FILE * outputFile1;
+		FILE * outputFile1;
 		outputFile1 = fopen("Result/ognnOutput", "a+");
 		fprintf(outputFile1,"\n********************OGNN-GNN-MAX*******************************\n");
-		fclose(outputFile1);*/
+		fclose(outputFile1);
 	}
-	print(egnn_sorted,ognn_sorted,k);
+	print(egnn_sorted,ognn_sorted,k);*/
 	visGraphConsTime+=obstructedDistance->visGraphConsTime;
 	shortestPathCalcTime+=obstructedDistance->shortestPathCalcTime;
 
@@ -132,6 +136,9 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	delete obstructedDistance;
 	delete initialVisGraph;
 	delete rt_dataPoints->kGNNHeap;
+	if(obsAlgoNumber==2){
+		delete rt_obstacle->rectangleNNHeap;
+	}
 }
 
 void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
@@ -153,8 +160,11 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
-	//ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	int obsAlgoNumber;
+	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;*/
 	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
 	sw1.start();
@@ -212,12 +222,12 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), less_than_key());
 		std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
-		printf("********************OGNN-CENTROID-NN-SUM*******************************\n");
-		/*FILE * outputFile1;
+		/*printf("********************OGNN-CENTROID-NN-SUM*******************************\n");
+		FILE * outputFile1;
 		outputFile1 = fopen("Result/ognnOutput", "a+");
 		fprintf(outputFile1,"\n********************OGNN-CENTROID-NN-SUM*******************************\n");
-		fclose(outputFile1);*/
-		print(enn_centroid_sorted,ognn_sorted,k);
+		fclose(outputFile1);
+		print(enn_centroid_sorted,ognn_sorted,k);*/
 
 	visGraphConsTime+=obstructedDistance->visGraphConsTime;
 	shortestPathCalcTime+=obstructedDistance->shortestPathCalcTime;
@@ -225,6 +235,9 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	delete obstructedDistance;
 	delete initialVisGraph;
 	delete rt_dataPoints->kGNNHeap;
+	if(obsAlgoNumber==2){
+		delete rt_obstacle->rectangleNNHeap;
+	}
 }
 
 void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
@@ -247,8 +260,11 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
-//	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	int obsAlgoNumber;
+	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;*/
 	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
 	sw1.start();
@@ -308,12 +324,12 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), less_than_key());
 		std::sort(ognn_sorted.begin(), ognn_sorted.end(), less_than_key());
-		printf("********************OGNN-CENTROID-NN-MAX*******************************\n");
+		//printf("********************OGNN-CENTROID-NN-MAX*******************************\n");
 		//FILE * outputFile1;
 		//outputFile1 = fopen("Result/ognnOutput", "a+");
 		//fprintf(outputFile1,"\n********************OGNN-CENTROID-NN-MAX*******************************\n");
 		//fclose(outputFile1);
-		print(enn_centroid_sorted,ognn_sorted,k);
+		//print(enn_centroid_sorted,ognn_sorted,k);
 
 	visGraphConsTime+=obstructedDistance->visGraphConsTime;
 	shortestPathCalcTime+=obstructedDistance->shortestPathCalcTime;
@@ -321,6 +337,9 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	delete obstructedDistance;
 	delete initialVisGraph;
 	delete rt_dataPoints->kGNNHeap;
+	if(obsAlgoNumber==2){
+		delete rt_obstacle->rectangleNNHeap;
+	}
 }
 
 

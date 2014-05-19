@@ -113,6 +113,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	/*printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
 			obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);*/
 	double dmax= dist_O_p_qi[0].distance;
+	//printf("dmax %lf\n",dmax);
 	if(obstacle[4]<dmax){
 			obsInRange.push_back(obstacle);
 	}

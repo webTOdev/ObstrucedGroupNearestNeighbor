@@ -143,6 +143,7 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	float centroid[1][2];
 	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
 	double threshold=calculateInitializeThreshold(centroid,p,queryPoints,numOfQueryPoints);
+	//printf("threshold %lf\n",threshold);
 	sw1.start();
 	addDataPointInVG(initialVisGraph,p);
 	sw1.stop();
