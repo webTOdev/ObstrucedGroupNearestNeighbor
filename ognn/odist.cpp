@@ -124,7 +124,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 		//printf("dmax %lf\n",dmax);	
 
 		while(1){
-			double nObstacle[5];
+			double *nObstacle=new double[5];
 			if(! firstIteration){
 				if(extraObs[4]<dmax){
 					obsInRange.push_back(extraObs);
@@ -133,20 +133,23 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 				else
 					break;
 			}
-			rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,p);
-			/*printf("%d Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",count++,
-				nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);*/
-			if(nObstacle[4]<dmax){				
-				obsInRange.push_back(nObstacle);
-			}
-			else {
-				extraObs = new double[5];
-				for(int j=0;j<5;j++)
-				{
-					extraObs[j]=nObstacle[j];
+			bool treeEmpty=rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,p);
+			if(!treeEmpty){
+				/*printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",
+					nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);*/
+				if(nObstacle[4]<dmax){				
+					obsInRange.push_back(nObstacle);
 				}
-				break;
+				else {
+					extraObs = new double[5];
+					for(int j=0;j<5;j++)
+					{
+						extraObs[j]=nObstacle[j];
+					}
+					break;
+				}
 			}
+			else break;
 			
 		}
 

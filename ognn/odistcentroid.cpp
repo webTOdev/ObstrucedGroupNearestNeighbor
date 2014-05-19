@@ -38,11 +38,25 @@ double calculateThreshold(Point2D centroid[],float* p, Point2D queryPoints[],int
 	}
 	return max;
 }
-void ObstructedDistanceCentroid::initialize(std::vector<MyStruct>& dist_O_p_qi,Point2D queryPoints[],int numOfQueryPoints){
-	float *q;
+void ObstructedDistanceCentroid::initialize(Point2D queryPoints[],int numOfQueryPoints){
+
 	L_R.resize(numOfQueryPoints);
 	L_C.resize(numOfQueryPoints);
 	L_N.resize(numOfQueryPoints);
+	float *q;
+	//Initialize p as inifinity distance from q_i and L_R to contain q_i
+	for(int i=0;i<numOfQueryPoints;i++){
+		q = new float[2];
+		q[0] = queryPoints[i][0];
+		q[1] = queryPoints[i][1];	
+
+		L_R[i].push_back(MyStruct(0, q));
+
+	}
+}
+
+void initDistanceVector(std::vector<MyStruct>& dist_O_p_qi,Point2D queryPoints[],int numOfQueryPoints){
+	float *q;
 	//Initialize p as inifinity distance from q_i and L_R to contain q_i
 	for(int i=0;i<numOfQueryPoints;i++){
 		q = new float[2];
@@ -51,9 +65,6 @@ void ObstructedDistanceCentroid::initialize(std::vector<MyStruct>& dist_O_p_qi,P
 		
 		//printf("\nInitialize Infinity Distance between p %lf,%lf is %lf and q %f,%f\n", p[0],p[1],euclideanDist,q[0],q[1]);
 		dist_O_p_qi.push_back(MyStruct(infinty, q));
-
-		L_R[i].push_back(MyStruct(0, q));
-
 	}
 }
 
@@ -61,8 +72,10 @@ bool pointInListAlready( vector < MyStruct >& L_R_qi,float *p){
 	float *q;
 	for(int i=0;i<L_R_qi.size();i++){
 		q = new float[2];
+		
 		q[0]=L_R_qi[i].queryPoints[0];
 		q[1]=L_R_qi[i].queryPoints[1];
+		//printf("p(%lf,%lf) and in list(%lf,%lf)\n",p[0],p[1],q[0],q[1]);
 		if(p[0]==q[0] && p[1]==q[1])
 			return true;
 	}
@@ -119,60 +132,79 @@ bool findTerminationCondition(std::vector<MyStruct>& dist_O_p_qi,Point2D queryPo
 	return condition;
 }
 double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
-																float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function){
+																float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function){										
 	Clock sw1;
 	double dist_OG=-1;
 	std::vector < MyStruct > dist_O_p_qi;
-	initialize(dist_O_p_qi,queryPoints,numOfQueryPoints);
+	if(globalThreshold==0.0){
+		initialize(queryPoints,numOfQueryPoints);
+	}
+	initDistanceVector(dist_O_p_qi,queryPoints,numOfQueryPoints);
 	float centroid[1][2];
 	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
 	double threshold=calculateInitializeThreshold(centroid,p,queryPoints,numOfQueryPoints);
+	sw1.start();
+	addDataPointInVG(initialVisGraph,p);
+	sw1.stop();
+	visGraphConsTime+=sw1.getDiff();
+
 	//Rectangle_BFN_NNQ will be called only once, so handling it from outside
 	double obstacle[5];
-	rt_obstacle->Rectangle_BFN_NNQ(centroid[0], obstacle);
-	/*printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
-			obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);*/
-	//obsInRange.push_back(obstacle);
-	addNewObstacleInVisGraph(obstacle,initialVisGraph);
+	//This call is for the first p
+	if(globalThreshold==0.0){
+		rt_obstacle->Rectangle_BFN_NNQ(centroid[0], obstacle);
+		/*printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
+				obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);*/
+		//obsInRange.push_back(obstacle);
+		if(obstacle[4]<threshold){		
+			addNewObstacleInVisGraph(obstacle,initialVisGraph);
+		}
+	}
 	double* extraObs = new double[5];
 	bool firstIteration=true;
 	bool condition=false;
-	bool pAdded=false;
+
 	vector<int> shortestPath;
 	do{
-		
-		while(1){
-			double nObstacle[5];
-			if(! firstIteration){
-				if(extraObs[4]<threshold){
-					//obsInRange.push_back(extraObs);
-					addNewObstacleInVisGraph(extraObs,initialVisGraph);
+		//Check whether the obstacle within the new threshold has already been retrieved
+		if(threshold>globalThreshold){
+			while(1){
+				double *nObstacle=new double[5];
+				if(! firstIteration){
+					if(extraObs[4]<threshold){
+						//obsInRange.push_back(extraObs);
+						addNewObstacleInVisGraph(extraObs,initialVisGraph);
+					}
+					//If the last obstacle gave a bigger value than current dmax than no need to check for the next
+					else
+						break;
 				}
-				//If the last obstacle gave a bigger value than current dmax than no need to check for the next
+				bool treeEmpty = rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,centroid[0]);
+				if(!treeEmpty){
+					/*printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",
+						nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);*/
+					if(nObstacle[4]<threshold){				
+						//obsInRange.push_back(nObstacle);
+						addNewObstacleInVisGraph(nObstacle,initialVisGraph);
+					}
+					else {
+						extraObs = new double[5];
+						firstIteration=false;
+						for(int j=0;j<5;j++)
+						{
+							extraObs[j]=nObstacle[j];
+						}
+						break;
+					}
+				}
 				else
 					break;
+				
 			}
-			rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,centroid[0]);
-			
-			/*printf("%d Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",count++,
-				nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);*/
-			if(nObstacle[4]<threshold){				
-				//obsInRange.push_back(nObstacle);
-				addNewObstacleInVisGraph(nObstacle,initialVisGraph);
-			}
-			else {
-				extraObs = new double[5];
-				firstIteration=false;
-				for(int j=0;j<5;j++)
-				{
-					extraObs[j]=nObstacle[j];
-				}
-				break;
-			}
-			
-	}
-	float *q,*v;
-	for(int i=0;i<numOfQueryPoints;i++){
+		}
+
+		float *q,*v;
+		for(int i=0;i<numOfQueryPoints;i++){
 		q = new float[2];
 		q[0] = queryPoints[i][0];
 		q[1] = queryPoints[i][1];	
@@ -189,19 +221,14 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 					relax(v,q,p,initialVisGraph,dist_O_p_qi,dist_o_v_q);
 				}
 			}
+			double dist_obs_p_q=computeObstructedDistance(initialVisGraph,p,q,shortestPath);
+			replaceObsDist(dist_O_p_qi,q,dist_obs_p_q);
 			//Check we have found already found the real distance between q_i and p
 			bool realDistanceFound = isRealDistanceFor_qFound(q,p,dist_O_p_qi,threshold,i);
 			if(realDistanceFound)
 				continue;
 			else{				
 				addVerticesOfObsInRangeInLc(obsInRange,initialVisGraph,i);
-				if(!pAdded){
-					sw1.start();
-					addDataPointInVG(initialVisGraph,p);
-					sw1.stop();
-					visGraphConsTime+=sw1.getDiff();
-				}
-				pAdded=true;
 			}
 			Point* vertex;
 			double dist_O_v_q=infinty;
@@ -245,47 +272,6 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 
 			}
 
-		/*	for(int j=0;j<L_N[i].size();j++){
-				vertex=L_N[i][j];
-				bool intersect=false;
-				vector<Line*> adjacentEdges=initialVisGraph->findEdgesWithThisPoint(vertex);
-				for(int k=0;k<obsInRange.size();k++){
-					tPolygon poly=createPolygon(obsInRange[k]);
-					for(int l=0;l<adjacentEdges.size();l++){
-						Line* line=adjacentEdges[l];
-						tLinestring lineS=createLS(line->a->x,line->a->y,line->b->x,line->b->y);
-						intersect = doesLineAndObstcaleIntersects(lineS,poly);
-						if(intersect) break;
-					}
-					if(intersect) break;
-
-				}
-				if(intersect) {
-					cVertex=j;
-					break;
-				}
-
-			}
-			if(cVertex!=-1){
-				L_N[i].erase(L_N[i].begin()+cVertex);
-				L_C[i].push_back(vertex);
-			}
-			else{
-					vector<int> shortestPath;
-					float *nVertex=new float[2];
-					nVertex[0]=vertex->x;
-					nVertex[0]=vertex->y;
-					dist_O_v_q=computeObstructedDistance(initialVisGraph,nVertex,q,shortestPath);
-					if(dist_O_v_q <= threshold){
-						L_N[i].erase(L_N[i].begin()+cVertex);
-						
-						L_R[i].push_back(MyStruct(dist_O_v_q,nVertex));
-					}else
-					{
-						L_N[i].erase(L_N[i].begin()+cVertex);
-						L_C[i].push_back(vertex);
-					}
-			}*/
 			for(int j=0;j<L_C[i].size();j++){
 				Point* mPoint=L_C[i][j];	
 				float *mVertex=new float[2];
@@ -300,8 +286,6 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 				}
 			}
 			L_C[i].clear();
-			dist_O_v_q=computeObstructedDistance(initialVisGraph,p,q,shortestPath);
-			replaceObsDist(dist_O_p_qi,q,dist_O_v_q);
 		}
 	}
 
@@ -309,7 +293,8 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	condition=findTerminationCondition(dist_O_p_qi,queryPoints,numOfQueryPoints,threshold);
 	obsInRange.clear();
 	}while(condition);
-
+	//Keeping track of how much radius obstacle has been retrived centering c_Q
+	globalThreshold=threshold;
 	dist_OG=0.0;
 	if(function==0){
 		for(int i=0;i<numOfQueryPoints;i++){
@@ -321,12 +306,6 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 		dist_OG=dist_O_p_qi[0].distance;
 	}
 
-	if(pAdded){
-		sw1.start();
-		removeDataPointFromVG(initialVisGraph,p);
-		sw1.stop();
-		visGraphConsTime+=sw1.getDiff();
-	}
 	//delete q;
 	//delete v;
 	delete extraObs;
@@ -338,9 +317,17 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 		visGraphConsTime+=sw1.getDiff();
 	}*/
 	//The rectangle heap from obs Rtree as it will be recreated for the next p
-	delete rt_obstacle->rectangleNNHeap;
+	//delete rt_obstacle->rectangleNNHeap;
 	
-
+	/*float *q;
+	for(int i=0;i<L_R.size();i++){
+		for(int j=0;j<L_R[i].size();j++){
+			q = new float[2];
+			q[0]=L_R[i][j].queryPoints[0];
+			q[1]=L_R[i][j].queryPoints[1];
+			printf("list[%d] (%lf,%lf)\n",i,q[0],q[1]);
+		}
+	}*/
 	return dist_OG;
 }
 

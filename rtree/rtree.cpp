@@ -922,7 +922,8 @@ void RTree::Rectangle_BFN_NNQ(Point2D o, double *_rslt)
 	delete heap;
 }
 
-void RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
+bool RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
+		bool isEmpty=false;
 		Heap *heap = new Heap();
 		heap->init(dimension);
 		heap->copy(rectangleNNHeap);
@@ -936,8 +937,11 @@ void RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 		while (again)
 		{
 			again = false;
-			if (!heap->remove(he))  //heap is empty
+			if (!heap->remove(he))  //heap is empty, the last leaf node is already retrived
+			{
 				son = -1;
+				isEmpty=true;
+			}
 			else
 			{
 				if (he->level == 0) //p is an object
@@ -960,6 +964,7 @@ void RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 			}
 		}
 		delete he;
+			
 		//Heap doesn't have  leaf nodes so need to reinsert
 		while (son != -1)
 		{
@@ -1023,6 +1028,7 @@ void RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 		}
 	rectangleNNHeap->copy(heap);
 	delete heap;
+	return isEmpty;
 }
 
 //Added by Nusrat
@@ -1212,7 +1218,8 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryP
 //END
 
 //function=0 sum, function=1 max
-void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoints,int function){
+bool RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoints,int function){
+		bool isEmpty=false;
 		Heap *heap = new Heap();
 		heap->init(dimension);
 		heap->copy(kGNNHeap);
@@ -1227,7 +1234,10 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 		{
 			again = false;
 			if (!heap->remove(he))  //heap is empty
+			{
 				son = -1;
+				isEmpty=true;
+			}
 			else
 			{
 				if (he->level == 0) //p is an object
@@ -1323,6 +1333,7 @@ void RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 		}
 	kGNNHeap->copy(heap);
 	delete heap;
+	return isEmpty;
 }
 
 

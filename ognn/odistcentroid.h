@@ -28,6 +28,8 @@ class ObstructedDistanceCentroid
 public:
 	long double visGraphConsTime;
 	long double shortestPathCalcTime;
+	//Global because next p will know upto which radius of obstacle from c_Q has been retrieved
+	double globalThreshold; 
 	char *VISGRAPH_FILE ;
 	VisibilityGraphController* vgController;
 	vector<string> obstacleList;
@@ -37,7 +39,7 @@ public:
 
 	double computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
 		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function);
-	void initialize(std::vector<MyStruct>& dist_O_p_qi,Point2D queryPoints[],int numOfQueryPoints);
+	void initialize(Point2D queryPoints[],int numOfQueryPoints);
 	bool visGraphContainsPoly(char buffer[1024]);
 	void addNewObstacleInVisGraph(double* obs,VisibilityGraph* initialVisGraph);
 	void writeQueryPointsInFile(Point2D queryPoints[],int numOfQueryPoints);
@@ -60,6 +62,7 @@ public:
 		visGraphConsTime=0.0;
 		shortestPathCalcTime=0.0;
 		VISGRAPH_FILE = "Datasets/visibilityGraphPolygons.txt";
+		globalThreshold=0.0;
 	}
 };
 
