@@ -182,8 +182,8 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 				}
 				bool treeEmpty = rt_obstacle->retrieve_kth_BFN_Rectangle_NNQ(nObstacle,centroid[0]);
 				if(!treeEmpty){
-					/*printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf\n",
-						nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4]);*/
+					/*printf("Next Nearest Obstacle is (%f,%f),(%f,%f) dist %lf and threshold %lf\n",
+						nObstacle[0], nObstacle[2],nObstacle[1], nObstacle[3],nObstacle[4],threshold);*/
 					if(nObstacle[4]<threshold){				
 						//obsInRange.push_back(nObstacle);
 						addNewObstacleInVisGraph(nObstacle,initialVisGraph);
@@ -334,8 +334,12 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 
 double ObstructedDistanceCentroid::computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p, float* q,vector<int>& shortestPath) {
 	int maxVertexNum = drawAndWriteFileVisEdges(initialVisGraph->edges);
+	Clock sw1;
+	sw1.start();
 	double shortestPathDistance = initialVisGraph->findShortestPath(p[0], p[1],
 			q[0], q[1],maxVertexNum,shortestPath);
+	sw1.stop();
+	shortestPathCalcTime+=sw1.getDiff();
 	/*int i = 0;
 	//Print the Shortest Path
 	printf("--------The Shortest Path is :");

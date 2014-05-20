@@ -8,7 +8,7 @@
 #include "VisibilityGraph.h"
 #include "pointHandler.h"
 #include "dijkstra.h"
-int MAX=1000;
+int MAX=100000;
 bool lineHasPoint(tPoint p,tLinestring l);
 VisibilityGraph::VisibilityGraph() {
 	// TODO Auto-generated constructor stub
@@ -125,6 +125,7 @@ double VisibilityGraph::value()
 }
 
 int* VisibilityGraph::getOtherEndOfThisPoint(Point* p){
+	//std::cout<<"Other Ends of p "<<p->id<<" ->"<<pointVSPoints[p->id][0]<<","<<pointVSPoints[p->id][1]<<std::endl;
 	int* otherEnds=pointVSPoints[p->id];
 	return otherEnds;
 

@@ -353,8 +353,12 @@ int ObstructedDistance::drawAndWriteFileVisEdges(vector<Line*> visEdges) {
 
 double ObstructedDistance::computeObstructedDistance(VisibilityGraph* initialVisGraph,float* p, float* q,vector<int>& shortestPath) {
 	int maxVertexNum = drawAndWriteFileVisEdges(initialVisGraph->edges);
+	Clock sw1;
+	sw1.start();
 	double shortestPathDistance = initialVisGraph->findShortestPath(p[0], p[1],
 			q[0], q[1],maxVertexNum,shortestPath);
+	sw1.stop();
+	shortestPathCalcTime+=sw1.getDiff();
 	/*int i = 0;
 	//Print the Shortest Path
 	printf("--------The Shortest Path is :");

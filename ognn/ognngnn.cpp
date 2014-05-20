@@ -88,7 +88,8 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		while(1){
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
-			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints,function);
+			bool treeEmpty = rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,queryPoints,numOfQueryPoints,function);
+			if(treeEmpty) break;
 			totalNumberOfPRetrieved++;
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];
@@ -203,7 +204,8 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
-			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1,function);
+			bool treeEmpty = rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1,function);
+			if(treeEmpty) break;
 			totalNumberOfPRetrieved++;
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];
@@ -303,7 +305,8 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
-			rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1,function);
+			bool treeEmpty = rt_dataPoints->retrieve_kth_BFN_GNNQ(nearestNeighbor,centroid,1,function);
+			if(treeEmpty) break;
 			totalNumberOfPRetrieved++;
 			kNN_point[0]=nearestNeighbor[0];
 			kNN_point[1]=nearestNeighbor[1];

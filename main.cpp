@@ -1988,7 +1988,7 @@ void generate_points_inside_rectangle_with_point(float r_x,float r_y,float lengt
 			m[2] = r_y - width / 2;
 			m[3] = r_y + width / 2;
 			int count=0;
-			int group=15;
+			int group=1;
 
 			while(1){
 
@@ -2001,7 +2001,7 @@ void generate_points_inside_rectangle_with_point(float r_x,float r_y,float lengt
 					FILE *input1,*input2,*input3;
 					input1 = fopen( "Datasets/sample_mbr.txt", "r");
 					//input2 = fopen( "Result/Input/queryArea/vary_g_8_k_4_qa_01.txt", "a");
-					input2 = fopen( "Result/Input/groupSize/vary_g_16_n_k_4_qa_005.txt", "a");
+					input2 = fopen( "Result/Input/groupSize/vary_g_2_n_k_4_qa_005.txt", "a");
 
 					
 					bool intersect=false;
@@ -2166,11 +2166,11 @@ void exp_ognn_varyk(){
 	int groupSize=8;
 	float qArea=0.005;
 	
-	for (int k = 2; k <= 32; k = k*2 ) {
-		for(int algo=1;algo<5;algo++){
+	for (int k = 16; k <= 32; k = k*2 ) {
+		for(int algo=4;algo<5;algo++){
 			FILE *input1;
 			input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
-			for(int sample=0;sample<20;sample++){
+			for(int sample=0;sample<2;sample++){
 				double kNearestNeighbor[64][3]; 
 				int blocksize = 1024;			//4096;//1024;//4096;
 				int b_length = 1024;
@@ -2205,7 +2205,7 @@ void exp_ognn_varyGroupSize(){
 	int k=4;
 	char* str = "Result/Input/groupSize/vary_g_";
 	
-	for (int groupSize = 4; groupSize <= 32; groupSize = groupSize*2 ) {
+	for (int groupSize = 2; groupSize <= 32; groupSize = groupSize*2 ) {
 		char dest[120];
 		strcpy( dest, str );
 		char integer_string[10];
@@ -2216,7 +2216,7 @@ void exp_ognn_varyGroupSize(){
 			FILE *input1;
 			//input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
 			input1 = fopen( dest, "r");
-			for(int sample=0;sample<20;sample++){
+			for(int sample=0;sample<2;sample++){
 				double kNearestNeighbor[64][3]; 
 				int blocksize = 1024;			//4096;//1024;//4096;
 				int b_length = 1024;
@@ -2264,7 +2264,7 @@ void exp_ognn_varyQueryArea(){
 			FILE *input1;
 			//input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
 			input1 = fopen( dest, "r");
-			for(int sample=0;sample<20;sample++){
+			for(int sample=0;sample<2;sample++){
 				double kNearestNeighbor[64][3]; 
 				int blocksize = 1024;			//4096;//1024;//4096;
 				int b_length = 1024;

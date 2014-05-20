@@ -22,8 +22,8 @@ public:
 	vector<Line*> obsSides;
 	vector<Line*> edges;
 	vector<Obstacle*> obstacles;
-	int pointVSPoints[1000][2];
-	int pointVSEdges[1000][2];
+	int pointVSPoints[100000][2];
+	int pointVSEdges[100000][2];
 
 	VisibilityGraph();
 	VisibilityGraph(vector<Obstacle*> o);

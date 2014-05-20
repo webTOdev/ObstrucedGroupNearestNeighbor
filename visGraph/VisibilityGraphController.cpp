@@ -168,7 +168,7 @@ vector<Line*> VisibilityGraphController::generateVisibleEdge(angleContainer angl
 		  //Check for clockwise side edges
 		  //Each points has two edge associated and thats why two new points
 		  int* otherEnds=vg->getOtherEndOfThisPoint(w_i);
-   		  // std::cout<<"Other Ends at w_i "<<w_i->id<<" ->"<<otherEnds[0]<<","<<otherEnds[1]<<std::endl;
+   		  //std::cout<<"Other Ends at w_i "<<w_i->id<<" ->"<<otherEnds[0]<<","<<otherEnds[1]<<std::endl;
 		  //Each points has two edge associated
 		  int* es=vg->getEdgesOfThisPoint(w_i);
 		  // std::cout<<"Edges at w_i "<<w_i->id<<" ->"<<es[0]<<","<<es[1]<<std::endl;
@@ -246,17 +246,19 @@ edgeContainer VisibilityGraphController::updateEdgeList(edgeContainer edges,int*
 
 				  Point* c=findPointById(visGraph->nodes,otherEnds[i]);
 				  ln = searchLineContainingPoint(c,es,visGraph->obsSides);
+				  if(ln !=NULL){
 				  //If clockwise side insert in edge list else delete
-				  if(isLeft(ori,w_i,c)){
-					  tLinestring lineS=createLineString(ln);
-					  //std::cout<<"Line "<<ln->id<< " is at clockwise side of Point "<<ori->id<<","<<w_i->id<<std::endl;
-					  double dist=bg::distance(boost::make_tuple(ori->x, ori->y),lineS);
-					  //std::cout<<"Distance : "<<ln->id<<" and "<<ori->id<<" : "<<dist<<std::endl;
-					  edges = insertOneEdgeInEdgeList(edges,ln,dist,ori,w_i,c);
+					  if(isLeft(ori,w_i,c)){
+						  tLinestring lineS=createLineString(ln);
+						  //std::cout<<"Line "<<ln->id<< " is at clockwise side of Point "<<ori->id<<","<<w_i->id<<std::endl;
+						  double dist=bg::distance(boost::make_tuple(ori->x, ori->y),lineS);
+						  //std::cout<<"Distance : "<<ln->id<<" and "<<ori->id<<" : "<<dist<<std::endl;
+						  edges = insertOneEdgeInEdgeList(edges,ln,dist,ori,w_i,c);
 
-				  }else{
-					  //std::cout<<"Line "<<ln->id<<" is at anti-clockwise side of "<<ori->id<<","<<w_i->id<<std::endl;
-					  edges = eraseOneEdgeFromEdgeList(edges,ln);
+					  }else{
+						  //std::cout<<"Line "<<ln->id<<" is at anti-clockwise side of "<<ori->id<<","<<w_i->id<<std::endl;
+						  edges = eraseOneEdgeFromEdgeList(edges,ln);
+					  }
 				  }
 
 	}
@@ -293,14 +295,20 @@ Line* findLineById( vector<Line*> lines,int itemToFind){
 Line* searchLineContainingPoint(Point* pt,int *lineIds,vector<Line*> lines){
 	Line* l=findLineById(lines,lineIds[0]);
 	//l->print();
-	if((l->a->id) == (pt->id) || (l->b->id)==(pt->id)){
-	return l;
+	if(l !=NULL){
+		if((l->a->id) == (pt->id) || (l->b->id)==(pt->id)){
+		return l;
+		}
 	}
 
 	l=findLineById(lines,lineIds[1]);
-	if((l->a->id) == (pt->id) || (l->b->id)==(pt->id)){
-		return l;
+	if(l !=NULL){
+		if((l->a->id) == (pt->id) || (l->b->id)==(pt->id)){
+			return l;
+		}
 	}
+
+	return NULL;
 
 
 }
