@@ -27,6 +27,11 @@ public:
 	int totalNumberOfPRetrieved;
 	long double visGraphConsTime;
 	long shortestPathCalcTime;
+
+	OGNN_GNN(){
+		visGraphConsTime=0.0;
+		shortestPathCalcTime=0.0;
+	}
 	
 };
 

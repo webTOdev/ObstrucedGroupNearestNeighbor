@@ -45,10 +45,10 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	int obsAlgoNumber;
-	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
-	obsAlgoNumber=1;*/
-	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
-	obsAlgoNumber=2;
+	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;
+	/*ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;*/
 	
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
@@ -73,11 +73,14 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 		egnn_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
 		//Compute aggObstructedDistance
 		double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+		if(aggObsDist!=-1)
 		ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 		//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);	
 	}
 
 	std::sort(egnn_sorted.begin(), egnn_sorted.end(), more_than_key());
+	if(ognn_sorted.empty())
+		return;
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
 	//print(egnn_sorted,ognn_sorted,k);
 	double dkmax_e=egnn_sorted[0].distance;
@@ -100,6 +103,7 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 			//Euclidean distance is greater so no need to check obs dist
 			if(kNN_point[2]<=dkmax_o){
 				double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+				if(aggObsDist==-1) continue;
 				ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 				//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
 				//printf("New OGNN found\n");
@@ -162,10 +166,10 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	int obsAlgoNumber;
-	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
-	obsAlgoNumber=1;*/
-	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
-	obsAlgoNumber=2;
+	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;
+	/*ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;*/
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
 	sw1.start();
@@ -188,6 +192,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		enn_centroid_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
 		//Compute aggObstructedDistance
 		double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+		if(aggObsDist!= -1)
 		ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 		//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);	
 	}
@@ -196,6 +201,8 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
 	//print(enn_centroid_sorted,ognn_sorted,k);
 	double dkmax_e=enn_centroid_sorted[0].distance;
+	if(ognn_sorted.empty())
+		return;
 	double dkmax_o=ognn_sorted[0].distance;
 	
 		double nearestNeighbor[3];
@@ -214,6 +221,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 			//printf("\nEuclidean Distance is %lf for p %f,%f\n", kNN_point[2],kNN_point[0],kNN_point[1]);	
 			dkmax_e = kNN_point[2];
 			double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+			if(aggObsDist==-1) continue;
 			if(aggObsDist<=dkmax_o){			
 				ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 				//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
@@ -263,10 +271,10 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	int obsAlgoNumber;
-	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
-	obsAlgoNumber=1;*/
-	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
-	obsAlgoNumber=2;
+	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;
+	/*ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;*/
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
 	sw1.start();
@@ -289,11 +297,14 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 		enn_centroid_sorted.push_back(MyStruct(kNN_point[2], kNN_point));
 		//Compute aggObstructedDistance
 		double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+		if(aggObsDist!= -1)
 		ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 		//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);	
 	}
 
 	std::sort(enn_centroid_sorted.begin(), enn_centroid_sorted.end(), more_than_key());
+	if(ognn_sorted.empty())
+		return;
 	std::sort(ognn_sorted.begin(), ognn_sorted.end(), more_than_key());
 	//print(enn_centroid_sorted,ognn_sorted,k);
 	double dkmax_e=enn_centroid_sorted[0].distance;
@@ -316,6 +327,7 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 			dkmax_e = kNN_point[2];
 			if(pointInsideTheIntersectionOfCircle(kNN_point,queryPoints,numOfQueryPoints,dkmax_o)){
 				double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
+				if(aggObsDist== -1) continue;
 				if(aggObsDist<=dkmax_o){			
 					ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
 					//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);

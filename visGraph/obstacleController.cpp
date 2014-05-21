@@ -24,6 +24,10 @@ Obstacle* createObstacle(string str){
 
 		 //set Edge
 		bg::for_each_segment(o->poly,get_segments<segment>);
+		/*printf("\n************** Create **********\n");
+		for(int i=0;i<o->vertices.size();i++){
+			o->vertices[i]->print();
+		}*/
 
 		return o;
 

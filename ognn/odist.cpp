@@ -79,7 +79,25 @@ bool ObstructedDistance::visGraphContainsPoly(char buffer[1024]) {
 
 	return false;
 }
+int range_test_2(RTree* srt,float* queryPoints, double distance){
 
+	Clock sw1;
+	sw1.start();
+	float mbr[4];
+	mbr[0]=queryPoints[0]-distance;
+	mbr[1]=queryPoints[0]+distance;
+	mbr[2]=queryPoints[1]-distance;
+	mbr[3]=queryPoints[1]+distance;
+	SortedLinList *res_list = new SortedLinList();
+	srt -> rangeQuery(mbr, res_list);
+	printf("Range Query returned %d entries\n",res_list->get_num());
+	//res_list->print();
+	int noOfObj= res_list->get_num();
+	delete res_list;
+	sw1.stop();
+	return noOfObj;
+
+}
 double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
 		float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function){
 
@@ -106,13 +124,18 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	std::sort(dist_O_p_qi.begin(), dist_O_p_qi.end(), more_than_key());
 	bool firstIteration=true;
 	bool pAdded=false;
+	double dmax= dist_O_p_qi[0].distance;
+	//Obs at distance greater than 400 takes too much time to retrieve , for 
+	//experiment we will avoid those
+	if( range_test_2(rt_obstacle,p,dmax) > 400)
+		return dist_OG;
+
 	
 	//Rectangle_BFN_NNQ will be called only once, so handling it from outside
 	double obstacle[5];
 	rt_obstacle->Rectangle_BFN_NNQ(p, obstacle);
 	/*printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
 			obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);*/
-	double dmax= dist_O_p_qi[0].distance;
 	//printf("dmax %lf\n",dmax);
 	if(obstacle[4]<dmax){
 			obsInRange.push_back(obstacle);

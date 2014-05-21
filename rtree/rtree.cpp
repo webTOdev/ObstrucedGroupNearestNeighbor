@@ -350,7 +350,8 @@ void RTree::rangeQuery(float *mbr, SortedLinList *res)
 {
     load_root();
 	//Added by Tanzima
-	io_access++;
+	//Commented for testing
+	//io_access++;
 	//..............
     root_ptr -> rangeQuery(mbr,res);
 
@@ -858,12 +859,12 @@ void RTree::Rectangle_BFN_NNQ(Point2D o, double *_rslt)
 	//------------------------------------------------------------
 	
 	int son = root; //this entry is to be visited next
+	io_access++;
 	while (son != -1)
 	{
 		RTNode *rtn = new RTNode(this, son);
 		for (int i = 0; i < rtn -> num_entries; i ++)
 		{
-			io_access++;
 			float o1[2];
 			o1[0]=(float)o[0];
 			o1[1]=(float)o[1];
@@ -911,6 +912,7 @@ void RTree::Rectangle_BFN_NNQ(Point2D o, double *_rslt)
 				else
 				{
 					son=he->son1;
+					io_access++;
 					
 				}
 			}
@@ -959,6 +961,7 @@ bool RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 				else
 				{
 					son=he->son1;
+					io_access++;
 
 				}
 			}
@@ -1020,6 +1023,7 @@ bool RTree::retrieve_kth_BFN_Rectangle_NNQ( double *_rslt, Point2D o){
 				else
 				{
 					son=he->son1;
+					io_access++;
 
 				}
 			}
@@ -1127,13 +1131,13 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryP
 	//------------------------------------------------------------
 
 	int son = root; //this entry is to be visited next
+	io_access++;
 	while (son != -1)
 	{
 		RTNode *rtn = new RTNode(this, son);
 		
 		for (int i = 0; i < rtn -> num_entries; i ++)
 		{
-			io_access++;
 			float o1[2];
 			float gnnMinDist=0;
 			//Find min Group distance
@@ -1205,6 +1209,7 @@ void RTree::Point_BFN_kGNNQ(Point2D o[], int k,double _rslt[][3],int numOfQueryP
 				else
 				{
 					son=he->son1;
+					io_access++;
 
 				}
 			}
@@ -1255,6 +1260,7 @@ bool RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 				else
 				{
 					son=he->son1;
+					io_access++;
 
 				}
 			}
@@ -1327,6 +1333,7 @@ bool RTree::retrieve_kth_BFN_GNNQ( double *_rslt, Point2D o[],int numOfQueryPoin
 				else
 				{
 					son=he->son1;
+					io_access++;
 
 				}
 			}

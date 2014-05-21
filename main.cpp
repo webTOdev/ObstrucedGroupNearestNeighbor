@@ -1910,10 +1910,10 @@ void createMBRFile(){
 void range_test(RTree* srt){
 
 	float mbr[4];
-	mbr[0]=0;
-	mbr[1]=9;
-	mbr[2]=0;
-	mbr[3]=9;
+	mbr[0]=2345-1000;
+	mbr[1]=2345+1000;
+	mbr[2]=9823-1000;
+	mbr[3]=9823+1000;
 	SortedLinList *res_list = new SortedLinList();
 	srt -> rangeQuery(mbr, res_list);
 	printf("Range Query returned %d entries\n",res_list->get_num());
@@ -2142,6 +2142,8 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-CENTROID-NN-MAX*******************************\n");
 	}
 	sw1.stop();
+	if(rt_obs->io_access == 0)
+		return;
 	sum_e->stime_sec += sw1.getDiff();
 	sum_e->io_access = rt->io_access;
 	sum_e->io_access_obs = rt_obs->io_access;
@@ -2166,11 +2168,11 @@ void exp_ognn_varyk(){
 	int groupSize=8;
 	float qArea=0.005;
 	
-	for (int k = 16; k <= 32; k = k*2 ) {
-		for(int algo=4;algo<5;algo++){
+	for (int k = 4; k <= 32; k = k*2 ) {
+		for(int algo=2;algo<5;algo++){
 			FILE *input1;
 			input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
-			for(int sample=0;sample<2;sample++){
+			for(int sample=0;sample<5;sample++){
 				double kNearestNeighbor[64][3]; 
 				int blocksize = 1024;			//4096;//1024;//4096;
 				int b_length = 1024;
@@ -2367,11 +2369,12 @@ int main(int argc, char* argv[]) {
 	//Uncomment this when you have changed your dataset , otherwise no need to build the rtree everytime
 	//RTree *rt_obs = new RTree(DATAFILE_MBR,TREEFILE_MBR,b_length,cache_obs,dimension);
 	//rt_obs->print_tree();
-	//range_test(rt_obs);
+	//range_test(srt_obs);
 	//delete rt_obs;
 
 	RTree *srt = new RTree(TREEFILE,  cache);
 	RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+	//range_test(srt_obs);
 	//srt_obs->print_tree();
 	//srt->print_tree();
 

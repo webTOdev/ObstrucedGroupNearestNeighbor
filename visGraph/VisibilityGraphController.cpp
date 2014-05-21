@@ -154,12 +154,13 @@ vector<Line*> VisibilityGraphController::generateVisibleEdge(angleContainer angl
 			  w_i_1=(--k)->second;
 			  ++k;
 		  }
-		  //std::cout << "Sweeps at "<<w_i->id<<std::endl;
+		 // std::cout << "Sweeps at "<<w_i->id<<std::endl;
 		  index++;
 
 		  sweepLine=new Line(ori,w_i);
 		  if(isVisible(w_i,ori,sweepLine,w_i_1,index,edges))
 		  {
+			//  std::cout<<"Visible Edges "<<ori->id<<"->"<<w_i->id<<std::endl;
 			  w_i->visited=true;
 			  ori->addVisible(w_i);
 			  visibleEdges.push_back(new Line(ori,w_i));
@@ -485,6 +486,7 @@ VisibilityGraph* VisibilityGraphController::addNewObstacleForIncrementalVisGraph
 		VisibilityGraph* vGraph,Obstacle* obs) {
 
 	Obstacle* o = vGraph->addObstacle(obs);
+	//o->print();
 	vector<Point*> obsVertices = o->getVertices();
 	setVisGraph(vGraph);
 
@@ -504,6 +506,7 @@ VisibilityGraph* VisibilityGraphController::addNewObstacleForIncrementalVisGraph
 	//Search for the visible edges from the new obstacle's nodes and Insert them
 	for (int i = 0; i < obsVertices.size(); i++) {
 		Point* point = obsVertices[i];
+		//point->print();
 		vector<Line*> temp = visibleVertices(point);
 		vGraph->insertEdgeInVisGraph(temp);
 	}

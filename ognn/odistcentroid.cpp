@@ -110,6 +110,10 @@ void ObstructedDistanceCentroid::addNewObstacleInVisGraph(double* obs,Visibility
 	obs[2], "))");
 	if (!visGraphContainsPoly(buffer)) {
 			Obstacle* newObs = createObstacle(buffer);
+			/*printf("\n**************After Create **********\n");
+			for(int i=0;i<newObs->vertices.size();i++){
+			newObs->vertices[i]->print();
+			}*/
 			sw1.start();
 			initialVisGraph = vgController->addNewObstacleForIncrementalVisGraph(
 									initialVisGraph, newObs);
@@ -131,6 +135,25 @@ bool findTerminationCondition(std::vector<MyStruct>& dist_O_p_qi,Point2D queryPo
 	}
 	return condition;
 }
+int range_test(RTree* srt,float* queryPoints, double distance){
+
+	Clock sw1;
+	sw1.start();
+	float mbr[4];
+	mbr[0]=queryPoints[0]-distance;
+	mbr[1]=queryPoints[0]+distance;
+	mbr[2]=queryPoints[1]-distance;
+	mbr[3]=queryPoints[1]+distance;
+	SortedLinList *res_list = new SortedLinList();
+	srt -> rangeQuery(mbr, res_list);
+	printf("Range Query returned %d entries\n",res_list->get_num());
+	//res_list->print();
+	int noOfObj= res_list->get_num();
+	delete res_list;
+	sw1.stop();
+	return noOfObj;
+
+}
 double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph* initialVisGraph,
 																float* p, Point2D queryPoints[],int numOfQueryPoints, RTree* rt_obstacle,int function){										
 	Clock sw1;
@@ -144,6 +167,10 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	centroidOfQ(queryPoints,numOfQueryPoints,centroid);
 	double threshold=calculateInitializeThreshold(centroid,p,queryPoints,numOfQueryPoints);
 	//printf("threshold %lf\n",threshold);
+	//Obs at distance greater than 400 takes too much time to retrieve , for 
+	//experiment we will avoid those
+	if( range_test(rt_obstacle,centroid[0],threshold) > 400)
+		return dist_OG;
 	sw1.start();
 	addDataPointInVG(initialVisGraph,p);
 	sw1.stop();

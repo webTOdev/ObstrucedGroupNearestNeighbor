@@ -27,7 +27,7 @@ class Point: public Geometry
 	bool isVisible(Point* p);
 	void removeVisible(Point *p);
 
-	Point * visible[100]; //std::list<int> visible;
+	Point * visible[10000]; //std::list<int> visible;
 
 };
 
