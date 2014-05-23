@@ -146,7 +146,7 @@ int range_test(RTree* srt,float* queryPoints, double distance){
 	mbr[3]=queryPoints[1]+distance;
 	SortedLinList *res_list = new SortedLinList();
 	srt -> rangeQuery(mbr, res_list);
-	printf("Range Query returned %d entries\n",res_list->get_num());
+	//printf("Range Query returned %d entries\n",res_list->get_num());
 	//res_list->print();
 	int noOfObj= res_list->get_num();
 	delete res_list;
@@ -169,7 +169,7 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	//printf("threshold %lf\n",threshold);
 	//Obs at distance greater than 400 takes too much time to retrieve , for 
 	//experiment we will avoid those
-	if( range_test(rt_obstacle,centroid[0],threshold) > 400)
+	if( range_test(rt_obstacle,centroid[0],threshold) > 300)
 		return dist_OG;
 	sw1.start();
 	addDataPointInVG(initialVisGraph,p);

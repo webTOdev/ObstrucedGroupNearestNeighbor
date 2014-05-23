@@ -1923,12 +1923,27 @@ void range_test(RTree* srt){
 
 }
 
+char* appendCharToCharArray(char* array, char a)
+{
+    size_t len = strlen(array);
+
+    char* ret = new char[len+2];
+
+    strcpy(ret, array);    
+    ret[len] = a;
+    ret[len+1] = '\0';
+
+    return ret;
+}
+
 //Experiments
 void print_output(char *s1, Exp_stat *e) {
 	//write in output file
 
-	FILE * outputFile1;
+	FILE *outputFile1,*outputFile2;
 	outputFile1 = fopen(s1, "a+");
+	char *s2=appendCharToCharArray(s1,'R');
+	outputFile2 = fopen(s2, "a+");
 
 	char test;
 
@@ -1950,10 +1965,23 @@ void print_output(char *s1, Exp_stat *e) {
 			e->visGraphConstime_sec/ (1.0 * CLOCKS_PER_SEC * SAMPLE),
 			e->shortestPathCalctime_sec/ (1.0 * CLOCKS_PER_SEC * SAMPLE)
 );
+	fprintf(outputFile2,
+			"%d\t%d\t%lf\t%.5lf\t%.5lf\t%.5lf\t%d\t%.5lf\t%.5lf\n",
+			e->k,
+			e->grpsize, 
+			e->qArea,
+			e->stime_sec / (1.0 * CLOCKS_PER_SEC * SAMPLE),
+			e->io_access,
+			e->io_access_obs,
+			e->totalNumberOfPRetrieved,
+			e->visGraphConstime_sec/ (1.0 * CLOCKS_PER_SEC * SAMPLE),
+			e->shortestPathCalctime_sec/ (1.0 * CLOCKS_PER_SEC * SAMPLE)
+);
 	//for(int j=0; j<g; j++)
 	//fprintf(outputFile2,"%d\t%.5lf\n", j, e->cnum_retrievals[j]/SAMPLE);
 
 	fclose(outputFile1);
+	fclose(outputFile2);
 }
 
 void exp_ognn_sum(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor[][3],RTree *rt_obs,RTree *rt,Cache *cache_obs,Cache *cache){
@@ -2120,25 +2148,25 @@ void exp_ognn(float queryPoints[][2],int groupSize,int k,double kNearestNeighbor
 	if(algoNum==1){
 	ognn_gnn->ognnUsingEGNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,0);
 	//fileName="Result/ognnSumUsingEGNN.txt";
-	fileName="Result/ognnSumUsingEGNN_obs2.txt";
+	fileName="Result/ognnSumUsingEGNN_obs2";
 	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-GNN-SUM*******************************");
 	}
 	if(algoNum==2){
 	ognn_gnn->ognnSumUsingNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,0);
 	//fileName="Result/ognnSumUsingNN.txt";
-	fileName="Result/ognnSumUsingNN_obs2.txt";
+	fileName="Result/ognnSumUsingNN_obs2";
 	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-CENTROID-NN-SUM*******************************\n");
 	}
 	if(algoNum==3){
 	ognn_gnn->ognnUsingEGNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,1);
 	//fileName="Result/ognnMaxUsingEGNN.txt";
-	fileName="Result/ognnMaxUsingEGNN_obs2.txt";
+	fileName="Result/ognnMaxUsingEGNN_obs2";
 	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-GNN-MAX*******************************");
 	}
 	if(algoNum==4){
 	ognn_gnn->ognnMaxUsingNN(queryPoints,groupSize,k,kNearestNeighbor, rt_obs,rt,1);
 	//fileName="Result/ognnMaxUsingNN.txt";
-	fileName="Result/ognnMaxUsingNN_obs2.txt";
+	fileName="Result/ognnMaxUsingNN_obs2";
 	writeOutputInfile(k,kNearestNeighbor,groupSize,"\n********************OGNN-CENTROID-NN-MAX*******************************\n");
 	}
 	sw1.stop();
@@ -2189,7 +2217,7 @@ void exp_ognn_varyk(){
 
 				RTree *srt = new RTree(TREEFILE,  cache);
 				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
-				printf("\n------------  Group Size %d , k = %d , Algo Num = %d  ----------\n",groupSize,k,algo);
+				printf("\n------------  Vary k = %d , Group Size %d , Algo Num = %d  ----------\n",groupSize,k,algo);
 				exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
 				delete cache;
 				delete srt;
@@ -2198,6 +2226,44 @@ void exp_ognn_varyk(){
 			}
 			fclose(input1);
 		}
+	}
+}
+
+void exp_ognn_varykSample(){
+	float queryPoints[8][2];
+	int groupSize=8;
+	float qArea=0.005;
+	
+	for (int k = 32; k <= 32; k = k*2 ) {
+		FILE *input1;
+		input1 = fopen( "Result/Input2/k/vary_k_g_8_qa_005.txt", "r");
+		for(int sample=0;sample<10;sample++){
+			 int x;
+			 for(int i=0; i<groupSize; i++)
+			 {
+			   fscanf(input1,"%ld%f%f",&x,&queryPoints[i][0],&queryPoints[i][1]);
+			 }
+			for(int algo=1;algo<5;algo++){
+			
+				double kNearestNeighbor[64][3]; 
+				int blocksize = 1024;			//4096;//1024;//4096;
+				int b_length = 1024;
+				int dimension = 2;
+				
+				Cache *cache = new Cache(0, blocksize);
+				Cache *cache_obs = new Cache(0,blocksize);
+
+				RTree *srt = new RTree(TREEFILE,  cache);
+				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+				printf("\n------------ Vary k = %d ,  Group Size %d , Algo Num = %d , Sample %d ----------\n",k,groupSize,algo,sample);
+				exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
+				delete cache;
+				delete srt;
+				delete cache_obs;
+				delete srt_obs;
+			}
+		}
+		fclose(input1);
 	}
 }
 
@@ -2247,6 +2313,52 @@ void exp_ognn_varyGroupSize(){
 	}
 }
 
+void exp_ognn_varyGroupSizeSample(){
+	float queryPoints[64][2];
+	float qArea=0.005;
+	int k=4;
+	char* str = "Result/Input2/groupSize/vary_g_";
+	
+	for (int groupSize = 2; groupSize <= 32; groupSize = groupSize*2 ) {
+		char dest[120];
+		strcpy( dest, str );
+		char integer_string[10];
+		sprintf(integer_string, "%d", groupSize);
+		strcat( dest, integer_string );
+		strcat( dest, "_k_4_qa_005.txt" );
+		FILE *input1;
+		//input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
+		input1 = fopen( dest, "r");
+		for(int sample=0;sample<9;sample++){
+			int x;
+			for(int i=0; i<groupSize; i++)
+			{
+			     fscanf(input1,"%ld%f%f",&x,&queryPoints[i][0],&queryPoints[i][1]);
+			}
+			for(int algo=1;algo<5;algo++){
+						
+				double kNearestNeighbor[64][3]; 
+				int blocksize = 1024;			//4096;//1024;//4096;
+				int b_length = 1024;
+				int dimension = 2;
+				
+				Cache *cache = new Cache(0, blocksize);
+				Cache *cache_obs = new Cache(0,blocksize);
+
+				RTree *srt = new RTree(TREEFILE,  cache);
+				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+				printf("\n------------Vary Group Size %d , k = %d , Algo Num = %d , Sample %d ----------\n",groupSize,k,algo,sample);
+				exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
+				delete cache;
+				delete srt;
+				delete cache_obs;
+				delete srt_obs;
+			}
+		}
+		fclose(input1);
+	}
+}
+
 void exp_ognn_varyQueryArea(){
 	float queryPoints[8][2];
 	
@@ -2292,6 +2404,54 @@ void exp_ognn_varyQueryArea(){
 			}
 			fclose(input1);
 		}
+	}
+}
+
+void exp_ognn_varyQueryAreaSample(){
+	float queryPoints[8][2];
+	
+	int k=4;
+	char* str = "Result/Input2/queryArea/vary_qa_";
+	int groupSize = 8;
+	
+	for (int queryArea = 2; queryArea <= 10; queryArea = queryArea+2 ) {
+		float qArea=(float)(queryArea)/(float)(1000);
+		char dest[120];
+		strcpy( dest, str );
+		char integer_string[10];
+		sprintf(integer_string, "%d", queryArea);
+		strcat( dest, integer_string );
+		strcat( dest, "_g_8_k_4.txt" );
+		FILE *input1;
+		//input1 = fopen( "Result/Input/groupSize/vary_g_8_k_4_qa_005.txt", "r");
+		input1 = fopen( dest, "r");
+		for(int sample=0;sample<10;sample++){
+			int x;
+			for(int i=0; i<groupSize; i++)
+			{
+			    fscanf(input1,"%ld%f%f",&x,&queryPoints[i][0],&queryPoints[i][1]);
+			}
+			for(int algo=1;algo<5;algo++){
+			
+				double kNearestNeighbor[64][3]; 
+				int blocksize = 1024;			//4096;//1024;//4096;
+				int b_length = 1024;
+				int dimension = 2;
+				
+				Cache *cache = new Cache(0, blocksize);
+				Cache *cache_obs = new Cache(0,blocksize);
+
+				RTree *srt = new RTree(TREEFILE,  cache);
+				RTree *srt_obs = new RTree(TREEFILE_MBR, cache_obs);
+				printf("\n------------Vary Query Area %lf,  Group Size %d , k = %d , Algo Num = %d ,Sample %d ----------\n",qArea,groupSize,k,algo,sample);
+				exp_ognn(queryPoints,groupSize,k,kNearestNeighbor, srt_obs,srt,cache_obs,cache,algo,qArea);
+				delete cache;
+				delete srt;
+				delete cache_obs;
+				delete srt_obs;
+			}
+		}
+		fclose(input1);
 	}
 }
 
@@ -2513,9 +2673,14 @@ int main(int argc, char* argv[]) {
 	srt_obs->rangeQuery(mbr, res_list);
 	res_list->print();
 */
-	exp_ognn_varyk();
+	/*exp_ognn_varyk();
 	exp_ognn_varyGroupSize();
-	exp_ognn_varyQueryArea();
+	exp_ognn_varyQueryArea();*/
+
+	//exp_ognn_varykSample();
+	exp_ognn_varyGroupSizeSample();
+	exp_ognn_varyQueryAreaSample();
+	
 
 
 	//delete cache;

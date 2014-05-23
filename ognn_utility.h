@@ -74,4 +74,5 @@ struct MyVertexStruct
 
 	MyVertexStruct(double d , Point* p) { distance = d; vertex =  p ;}
 };
+
 #endif /* OGNN_UTILITY_H_ */
