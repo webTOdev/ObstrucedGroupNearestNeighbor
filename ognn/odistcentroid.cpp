@@ -32,8 +32,10 @@ double calculateThreshold(Point2D centroid[],float* p, Point2D queryPoints[],int
 		q[1] = queryPoints[i][1];	
 		double euclideanDist_c_qi = getDistanceBetweenTwoPoints(c, q);
 		double obsDist_p_qi = dist_O_p_qi[i].distance;	
-		if(max<(euclideanDist_c_qi+obsDist_p_qi)){
-			max=euclideanDist_c_qi+obsDist_p_qi;
+		if(obsDist_p_qi<infinty){
+			if(max<(euclideanDist_c_qi+obsDist_p_qi)){
+				max=euclideanDist_c_qi+obsDist_p_qi;
+			}
 		}
 	}
 	return max;
@@ -146,7 +148,7 @@ int range_test(RTree* srt,float* queryPoints, double distance){
 	mbr[3]=queryPoints[1]+distance;
 	SortedLinList *res_list = new SortedLinList();
 	srt -> rangeQuery(mbr, res_list);
-	//printf("Range Query returned %d entries\n",res_list->get_num());
+	printf("Range Query returned %d entries\n",res_list->get_num());
 	//res_list->print();
 	int noOfObj= res_list->get_num();
 	delete res_list;
@@ -169,8 +171,7 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	//printf("threshold %lf\n",threshold);
 	//Obs at distance greater than 400 takes too much time to retrieve , for 
 	//experiment we will avoid those
-	if( range_test(rt_obstacle,centroid[0],threshold) > 300)
-		return dist_OG;
+	
 	sw1.start();
 	addDataPointInVG(initialVisGraph,p);
 	sw1.stop();
@@ -180,6 +181,8 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	double obstacle[5];
 	//This call is for the first p
 	if(globalThreshold==0.0){
+		if( range_test(rt_obstacle,centroid[0],threshold) > 50)
+		return dist_OG;
 		rt_obstacle->Rectangle_BFN_NNQ(centroid[0], obstacle);
 		/*printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],
 				obstacle[0], obstacle[2],obstacle[1], obstacle[3],obstacle[4]);*/
@@ -236,6 +239,7 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 		q = new float[2];
 		q[0] = queryPoints[i][0];
 		q[1] = queryPoints[i][1];	
+		bool distComputed=false;
 		//Have we already found the real distance between dist_O(q_i,p)?
 		if(! pointInListAlready(L_R[i],p)){
 			//Take each vertex one by one in L_R[i]
@@ -247,10 +251,13 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 				if(isVisible(v,p,initialVisGraph)){
 					double dist_o_v_q=L_R[i][j].distance;
 					relax(v,q,p,initialVisGraph,dist_O_p_qi,dist_o_v_q);
+					distComputed=true;
 				}
 			}
-			double dist_obs_p_q=computeObstructedDistance(initialVisGraph,p,q,shortestPath);
-			replaceObsDist(dist_O_p_qi,q,dist_obs_p_q);
+			if(!distComputed){
+				double dist_obs_p_q=computeObstructedDistance(initialVisGraph,p,q,shortestPath);
+				replaceObsDist(dist_O_p_qi,q,dist_obs_p_q);
+			}
 			//Check we have found already found the real distance between q_i and p
 			bool realDistanceFound = isRealDistanceFor_qFound(q,p,dist_O_p_qi,threshold,i);
 			if(realDistanceFound)
@@ -314,7 +321,8 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 				}
 			}
 			L_C[i].clear();
-		}
+		}else
+			return -1;
 	}
 
 	threshold=calculateThreshold(centroid,p,queryPoints,numOfQueryPoints,dist_O_p_qi);
@@ -327,11 +335,17 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	if(function==0){
 		for(int i=0;i<numOfQueryPoints;i++){
 			dist_OG+=dist_O_p_qi[i].distance;
+			if(dist_O_p_qi[i].distance == infinty){
+				return -1;
+			}
 		}
 	}
 	if(function==1){
 		std::sort(dist_O_p_qi.begin(), dist_O_p_qi.end(), more_than_key());
 		dist_OG=dist_O_p_qi[0].distance;
+		if(dist_O_p_qi[0].distance == infinty){
+				return -1;
+		}
 	}
 
 	//delete q;
