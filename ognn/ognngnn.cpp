@@ -45,10 +45,10 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	int obsAlgoNumber;
-	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
-	obsAlgoNumber=1;*/
-	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
-	obsAlgoNumber=2;
+	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;
+	/*ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;*/
 	
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
@@ -110,10 +110,12 @@ void OGNN_GNN::ognnUsingEGNN(Point2D queryPoints[], int numOfQueryPoints,
 			if(kNN_point[2]<=dkmax_o){
 				double aggObsDist = obstructedDistance->computeAggObstructedDistance(initialVisGraph,kNN_point,queryPoints,numOfQueryPoints,rt_obstacle,function);
 				if(aggObsDist==-1) continue;
-				ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
-				//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
-				//printf("New OGNN found\n");
-				dkmax_o=aggObsDist;
+				if(aggObsDist<=dkmax_o){
+					ognn_sorted.push_back(MyStruct(aggObsDist, kNN_point));
+					//printf("\nAggregate Obstructed Distance is %lf for p %f,%f\n", aggObsDist,kNN_point[0],kNN_point[1]);
+					//printf("New OGNN found\n");
+					dkmax_o=aggObsDist;
+				}
 			}
 			else
 				break;
@@ -172,10 +174,10 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	int obsAlgoNumber;
-	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
-	obsAlgoNumber=1;*/
-	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
-	obsAlgoNumber=2;
+	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;
+	/*ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;*/
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
 	sw1.start();
@@ -218,7 +220,7 @@ void OGNN_GNN::ognnSumUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	
 		double nearestNeighbor[3];
 		while(dkmax_e < dkmax_o/numOfQueryPoints){
-			//printf("dkmax_e %lf  dkmax_o %lf",dkmax_e,dkmax_o/numOfQueryPoints);
+			//printf("dkmax_e %lf  dkmax_o %lf\n",dkmax_e,dkmax_o/numOfQueryPoints);
 
 		//Find next Group Nearest Neighbour
 			kNN_point = new float[3];
@@ -282,10 +284,10 @@ void OGNN_GNN::ognnMaxUsingNN(Point2D queryPoints[], int numOfQueryPoints,
 	//Add the query points in the vis graph -- **only once**
 	VisibilityGraph* initialVisGraph = new VisibilityGraph();
 	int obsAlgoNumber;
-	/*ObstructedDistance* obstructedDistance= new ObstructedDistance();
-	obsAlgoNumber=1;*/
-	ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
-	obsAlgoNumber=2;
+	ObstructedDistance* obstructedDistance= new ObstructedDistance();
+	obsAlgoNumber=1;
+	/*ObstructedDistanceCentroid* obstructedDistance= new ObstructedDistanceCentroid();
+	obsAlgoNumber=2;*/
 	obstructedDistance->writeQueryPointsInFile(queryPoints,numOfQueryPoints);
 	Clock sw1;
 	sw1.start();

@@ -148,7 +148,7 @@ int range_test(RTree* srt,float* queryPoints, double distance){
 	mbr[3]=queryPoints[1]+distance;
 	SortedLinList *res_list = new SortedLinList();
 	srt -> rangeQuery(mbr, res_list);
-	printf("Range Query returned %d entries\n",res_list->get_num());
+	//printf("Range Query returned %d entries\n",res_list->get_num());
 	//res_list->print();
 	int noOfObj= res_list->get_num();
 	delete res_list;
@@ -181,7 +181,7 @@ double ObstructedDistanceCentroid::computeAggObstructedDistance(VisibilityGraph*
 	double obstacle[5];
 	//This call is for the first p
 	if(globalThreshold==0.0){
-		if( range_test(rt_obstacle,centroid[0],threshold) > 50)
+		if( range_test(rt_obstacle,centroid[0],threshold) > 100)
 		return dist_OG;
 		rt_obstacle->Rectangle_BFN_NNQ(centroid[0], obstacle);
 		/*printf("Nearest Obstacle of (%f,%f), is (%f,%f),(%f,%f) dist %lf\n", p[0], p[1],

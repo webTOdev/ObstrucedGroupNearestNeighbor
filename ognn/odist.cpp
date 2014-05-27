@@ -90,7 +90,7 @@ int range_test_2(RTree* srt,float* queryPoints, double distance){
 	mbr[3]=queryPoints[1]+distance;
 	SortedLinList *res_list = new SortedLinList();
 	srt -> rangeQuery(mbr, res_list);
-	printf("Range Query returned %d entries\n",res_list->get_num());
+	//printf("Range Query returned %d entries\n",res_list->get_num());
 	//res_list->print();
 	int noOfObj= res_list->get_num();
 	delete res_list;
@@ -127,7 +127,7 @@ double ObstructedDistance::computeAggObstructedDistance(VisibilityGraph* initial
 	double dmax= dist_O_p_qi[0].distance;
 	//Obs at distance greater than 400 takes too much time to retrieve , for 
 	//experiment we will avoid those
-	if( range_test_2(rt_obstacle,p,dmax) > 400)
+	if( range_test_2(rt_obstacle,p,dmax) > 100)
 		return dist_OG;
 
 	
@@ -307,6 +307,7 @@ bool ObstructedDistance::checkIntersectionWithSP(float* q,vector< MyShortestPath
 			}
 	}
 	//Read in pair 0 3 1 -> 0 3, 3 1
+	if(sp.size()!=0)
 	for(int i=0;i<sp.size()-1;i++){
 		int id=sp[i];
 		Point* a = getPointById(initialVisGraph->nodes,id);
@@ -314,6 +315,8 @@ bool ObstructedDistance::checkIntersectionWithSP(float* q,vector< MyShortestPath
 		id=sp[i+1];
 		Point* b = getPointById(initialVisGraph->nodes,id);
 		//printf("Point id %d =%d : (%lf,%lf) \n",id,a->id,a->x,a->y);
+		if(a==NULL || b==NULL)
+			continue;
 
 		tPolygon tPoly=createPolygon(obs);
 		tLinestring lineS;
